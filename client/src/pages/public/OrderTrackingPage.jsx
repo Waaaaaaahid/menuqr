@@ -10,6 +10,7 @@ import {
   Store,
   QrCode,
   Sparkles,
+  Star,
 } from 'lucide-react';
 import api from '../../api/axios';
 import { useSocket } from '../../context/SocketContext';
@@ -134,7 +135,7 @@ export default function OrderTrackingPage() {
     { key: 'accepted', label: 'Accepted', desc: 'Kitchen acknowledged order', icon: CheckCircle2 },
     { key: 'preparing', label: 'Cooking', desc: 'Chef is crafting your dishes', icon: ChefHat },
     { key: 'ready', label: 'Ready for Table', desc: 'Plated and ready to be served', icon: PackageCheck },
-    { key: 'completed', label: 'Completed', desc: 'Served & dining complete', icon: Sparkles },
+    { key: 'completed', label: 'Served', desc: 'Your order has been served. Enjoy your meal!', icon: Sparkles },
   ];
 
   const getStepIndex = (status) => {
@@ -326,14 +327,36 @@ export default function OrderTrackingPage() {
             </div>
           </div>
 
+          {/* Google review prompt appears only after the order is served. */}
+          {order.status === 'completed' && (
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-center space-y-3">
+              <div className="mx-auto w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm">
+                <Star className="w-6 h-6 text-amber-500 fill-amber-400" />
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-slate-900">Enjoyed your experience?</h3>
+                <p className="text-xs text-slate-600 mt-1">Your honest feedback helps {restaurant?.name || 'us'} serve you better.</p>
+              </div>
+              {restaurant?.googleReviewUrl ? (
+                <a href={restaurant.googleReviewUrl} target="_blank" rel="noopener noreferrer" className="w-full py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center justify-center gap-2">
+                  <Star className="w-4 h-4 fill-amber-400 text-amber-400" /> Write a Google Review
+                </a>
+              ) : (
+                <p className="text-[11px] text-amber-800">Google review link has not been added by the restaurant yet.</p>
+              )}
+              <p className="text-[10px] text-slate-500">Please share your honest experience. Reviews are always optional.</p>
+            </div>
+          )}
+
           {/* Action to Order More */}
           {restaurant?.slug && (
             <div className="pt-2">
               <Link
                 to={`/menu/${restaurant.slug}?table=${encodeURIComponent(order.table?.tableNumber || '')}&key=${encodeURIComponent(order.table?.qrToken || '')}`}
+                onClick={() => clearCustomerActiveOrder(restaurant.slug, order._id)}
                 className="w-full py-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all"
               >
-                <span>Add More Dishes to Table</span>
+                <span>{order.status === 'completed' ? 'Order Again' : 'Add More Dishes to Table'}</span>
               </Link>
             </div>
           )}
