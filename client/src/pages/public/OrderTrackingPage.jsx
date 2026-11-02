@@ -203,6 +203,15 @@ export default function OrderTrackingPage() {
                 </p>
               </div>
             </div>
+          ) : order.status === 'completed' ? (
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-center space-y-2">
+              <div className="mx-auto w-14 h-14 rounded-full bg-white flex items-center justify-center shadow-sm">
+                <CheckCircle2 className="w-7 h-7 text-emerald-600" />
+              </div>
+              <p className="text-[10px] font-black uppercase tracking-widest text-emerald-700">Order completed</p>
+              <h2 className="text-xl font-black text-emerald-950">Your order has been served!</h2>
+              <p className="text-xs text-emerald-800">Enjoy your meal. We hope to see you again soon.</p>
+            </div>
           ) : (
             /* Live Progress Timeline */
             <div className="space-y-6">
