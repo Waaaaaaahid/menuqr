@@ -35,9 +35,10 @@ export const CartProvider = ({ children }) => {
     }
   }, [items, restaurantSlug]);
 
-  const addToCart = (dish, qty = 1, instructions = '') => {
+  const addToCart = (dish, qty = 1, instructions = '', selectedSize = '') => {
     setItems((prev) => {
-      const existingIndex = prev.findIndex((i) => i._id === dish._id);
+      const lineId = selectedSize ? dish._id + '__' + selectedSize : dish._id;
+      const existingIndex = prev.findIndex((i) => i._id === lineId);
       if (existingIndex > -1) {
         const updated = [...prev];
         updated[existingIndex] = {
@@ -50,9 +51,11 @@ export const CartProvider = ({ children }) => {
       return [
         ...prev,
         {
-          _id: dish._id,
+          _id: lineId,
+          menuItemId: dish._id,
           name: dish.name,
-          price: dish.price,
+          price: selectedSize ? ((dish.sizeOptions || []).find((s) => s.name === selectedSize)?.price ?? dish.price) : dish.price,
+          selectedSize,
           quantity: qty,
           isVeg: dish.isVeg,
           image: dish.image,
