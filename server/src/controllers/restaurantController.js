@@ -259,7 +259,8 @@ export const getPublicMenu = async (req, res, next) => {
       });
     }
 
-    // Verify table if specified
+    // A public menu session must originate from a table's QR code.
+    if (!tableParam || !tableKey) return res.status(403).json({ success: false, message: 'Please scan the QR code placed on your table to open this menu.' });
     let tableInfo = null;
     if (tableParam && tableKey) {
       tableInfo = await Table.findOne({
