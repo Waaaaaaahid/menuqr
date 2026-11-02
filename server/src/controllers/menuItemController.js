@@ -83,6 +83,7 @@ export const createMenuItem = async (req, res, next) => {
       name,
       description,
       price,
+      sizeOptions,
       category,
       image,
       isVeg,
@@ -122,6 +123,7 @@ export const createMenuItem = async (req, res, next) => {
       name: name.trim(),
       description: description || '',
       price: Number(price),
+      sizeOptions: Array.isArray(sizeOptions) ? sizeOptions.filter((s) => s?.name && Number.isFinite(Number(s.price))).map((s) => ({ name: String(s.name).trim(), price: Number(s.price) })) : [],
       image: image || '',
       isVeg: isVeg !== undefined ? Boolean(isVeg) : true,
       isPopular: Boolean(isPopular),
@@ -167,6 +169,7 @@ export const updateMenuItem = async (req, res, next) => {
       name,
       description,
       price,
+      sizeOptions,
       category,
       image,
       isVeg,
@@ -197,6 +200,7 @@ export const updateMenuItem = async (req, res, next) => {
     if (name !== undefined) item.name = name.trim();
     if (description !== undefined) item.description = description;
     if (price !== undefined) item.price = Number(price);
+    if (sizeOptions !== undefined) item.sizeOptions = Array.isArray(sizeOptions) ? sizeOptions.filter((s) => s?.name && Number.isFinite(Number(s.price))).map((s) => ({ name: String(s.name).trim(), price: Number(s.price) })) : [];
     if (image !== undefined) item.image = image;
     if (isVeg !== undefined) item.isVeg = Boolean(isVeg);
     if (isPopular !== undefined) item.isPopular = Boolean(isPopular);
