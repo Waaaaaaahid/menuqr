@@ -31,6 +31,7 @@ export default function CartDrawer({ restaurant, isOpen, onClose, onOpen }) {
     clearCart,
     tableNumber,
     tableToken,
+    tableSessionInfo,
     customerInfo,
     setCustomerInfo,
     specialNotes,
@@ -56,7 +57,12 @@ export default function CartDrawer({ restaurant, isOpen, onClose, onOpen }) {
 
     const activeTable = tableNumber;
     if (!activeTable || !tableToken) {
-      addToast('Please enter your Table Number so the kitchen knows where to serve!', 'error');
+      addToast('Please scan the QR code placed on your table.', 'error');
+      return;
+    }
+    const verifiedSessionToken = tableSessionInfo?.tableNumber === activeTable ? tableSessionInfo.token : '';
+    if (!verifiedSessionToken) {
+      addToast('Please verify your table with restaurant staff before ordering.', 'error');
       return;
     }
 
@@ -66,6 +72,7 @@ export default function CartDrawer({ restaurant, isOpen, onClose, onOpen }) {
         restaurantSlug: restaurant.slug,
         tableNumber: activeTable,
         tableKey: tableToken,
+        tableSessionToken: verifiedSessionToken,
         customerName: customerInfo.name || 'Guest',
         customerPhone: customerInfo.phone || '',
         specialNotes: specialNotes || '',
