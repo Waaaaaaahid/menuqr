@@ -4,7 +4,17 @@ export const getCustomerActiveOrder = (restaurantSlug) => {
   if (!restaurantSlug || typeof window === 'undefined') return null;
   try {
     const raw = window.localStorage.getItem(storageKey(restaurantSlug));
-    return raw ? JSON.parse(raw) : null;
+    if (!raw) return null;
+    const order = JSON.parse(raw);
+    // Keep served orders available for review for 24 hours, then let a fresh visit start at the menu.
+    if (String(order?.status || '').toLowerCase() === 'completed') {
+      const savedAt = new Date(order.savedAt || 0).getTime();
+      if (!savedAt || Date.now() - savedAt > 24 * 60 * 60 * 1000) {
+        window.localStorage.removeItem(storageKey(restaurantSlug));
+        return null;
+      }
+    }
+    return order;
   } catch {
     return null;
   }
