@@ -14,8 +14,8 @@ export const getTables = async (req, res, next) => {
 
     // Upgrade older tables created before QR tokens were introduced.
     for (const table of tables) {
-      if (!table.qrToken) table.qrToken = randomBytes(24).toString('hex');
-      if (!table.qrCodeSvg?.includes(table.qrToken)) {
+      if (!table.qrToken) {
+        table.qrToken = randomBytes(24).toString('hex');
         const clientBaseUrl = process.env.CLIENT_URL || 'http://localhost:5173';
         const qrInfo = await generateTableQRCode(clientBaseUrl, req.restaurant.slug, table.tableNumber, table.qrToken);
         table.qrCodeDataUrl = qrInfo.qrCodeDataUrl;
