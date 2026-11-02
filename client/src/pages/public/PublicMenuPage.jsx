@@ -7,6 +7,7 @@ import RestaurantHeader from '../../components/menu/RestaurantHeader';
 import FoodCard from '../../components/menu/FoodCard';
 import FoodDetailModal from '../../components/menu/FoodDetailModal';
 import CartDrawer from '../../components/menu/CartDrawer';
+import TableSessionGate from '../../components/menu/TableSessionGate';
 import Modal from '../../components/common/Modal';
 import { DietaryBadge } from '../../components/common/Badge';
 import { getCustomerActiveOrder, clearCustomerActiveOrder } from '../../utils/customerOrders';
@@ -179,6 +180,7 @@ export default function PublicMenuPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 pb-28">
+      <TableSessionGate restaurantSlug={slug} tableNumber={tableParam} tableKey={tableKey} />
       {/* Top Restaurant Header */}
       <RestaurantHeader
         restaurant={restaurant}
