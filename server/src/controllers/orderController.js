@@ -23,6 +23,7 @@ export const placeOrder = async (req, res, next) => {
     const {
       restaurantSlug,
       tableNumber,
+      tableKey,
       customerName,
       customerPhone,
       items,
@@ -52,13 +53,13 @@ export const placeOrder = async (req, res, next) => {
       });
     }
 
-    // Lookup Table if tableNumber provided
-    let tableDoc = null;
-    if (tableNumber) {
-      tableDoc = await Table.findOne({
-        restaurant: restaurant._id,
-        tableNumber: tableNumber.trim(),
-      });
+    // Orders are accepted only from a valid table-specific QR link.
+    if (!tableNumber || !tableKey) {
+      return res.status(400).json({ success: false, message: 'Please scan the QR code placed on your table to order.' });
+    }
+    const tableDoc = await Table.findOne({ restaurant: restaurant._id, tableNumber: tableNumber.trim(), qrToken: tableKey });
+    if (!tableDoc) {
+      return res.status(403).json({ success: false, message: 'This table QR code is invalid. Please scan the QR displayed on your table.' });
     }
 
     // Fetch and verify all items server-side to guarantee accurate pricing
