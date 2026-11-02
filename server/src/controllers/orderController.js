@@ -240,6 +240,7 @@ export const updateOrderStatus = async (req, res, next) => {
 
     // The kitchen countdown starts only when the admin accepts the order.
     if (status === 'accepted' && previousStatus === 'pending') {
+      if (!order.prepTimeMinutes) order.prepTimeMinutes = 15;
       const requestedMinutes = Number(req.body.prepTimeMinutes);
       if (Number.isFinite(requestedMinutes) && requestedMinutes >= 1 && requestedMinutes <= 240) {
         order.prepTimeMinutes = Math.round(requestedMinutes);
