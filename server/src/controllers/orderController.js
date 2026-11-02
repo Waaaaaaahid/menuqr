@@ -121,7 +121,8 @@ export const placeOrder = async (req, res, next) => {
       orderNumber,
       table: {
         id: tableDoc ? tableDoc._id : null,
-        tableNumber: tableNumber ? tableNumber.trim() : 'Takeaway / Counter',
+        tableNumber: tableNumber.trim(),
+        qrToken: tableDoc.qrToken,
       },
       customer: {
         name: customerName ? customerName.trim() : 'Guest',
