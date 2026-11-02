@@ -50,6 +50,11 @@ const restaurantSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    googleReviewUrl: {
+      type: String,
+      default: '',
+      trim: true,
+    },
     email: {
       type: String,
       default: '',
