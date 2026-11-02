@@ -56,6 +56,7 @@ const orderSchema = new mongoose.Schema(
         type: String,
         required: true,
       },
+      qrToken: { type: String, default: '' },
     },
     customer: {
       name: {
