@@ -131,7 +131,7 @@ export default function OrderTrackingPage() {
         <div className="flex items-center justify-between">
           {restaurant?.slug && (
             <Link
-              to={`/menu/${restaurant.slug}?table=${encodeURIComponent(order.table?.tableNumber || '')}`}
+              to={`/menu/${restaurant.slug}?table=${encodeURIComponent(order.table?.tableNumber || '')}&key=${encodeURIComponent(order.table?.qrToken || '')}`}
               className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 bg-white px-3 py-2 rounded-xl border border-slate-200 shadow-xs transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
@@ -225,6 +225,14 @@ export default function OrderTrackingPage() {
                   This page updates live automatically without refreshing.
                 </p>
               </div>
+            </div>
+          )}
+
+          {order.prepStartedAt && !isCancelled && !['ready', 'completed'].includes(order.status) && (
+            <div className="rounded-2xl border border-indigo-200 bg-indigo-50 p-5 text-center space-y-1">
+              <p className="text-[10px] font-black uppercase tracking-widest text-indigo-700">Estimated preparation time</p>
+              <p className="text-4xl font-black tabular-nums text-indigo-950">{order.prepPausedAt ? 'Paused' : timerText}</p>
+              <p className="text-xs text-indigo-700">{order.prepPausedAt ? 'The kitchen timer is temporarily paused.' : 'Live countdown — the restaurant can adjust this estimate.'}</p>
             </div>
           )}
 
