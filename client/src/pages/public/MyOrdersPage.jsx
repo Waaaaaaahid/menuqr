@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Clock3, PackageCheck, RefreshCw, ShoppingBag } from 'lucide-react';
 import api from '../../api/axios';
 import { useSocket } from '../../context/SocketContext';
@@ -41,13 +41,15 @@ const getTimer = (order, now) => {
 
 export default function MyOrdersPage() {
   const { slug } = useParams();
+  const [searchParams] = useSearchParams();
+  const tableParam = searchParams.get('table') || '';
   const { socket, joinOrderRoom } = useSocket();
   const [orders, setOrders] = useState([]);
   const [restaurant, setRestaurant] = useState(null);
   const [loading, setLoading] = useState(true);
   const [clockNow, setClockNow] = useState(Date.now());
 
-  const savedOrders = useMemo(() => getCustomerOrders(slug), [slug]);
+  const savedOrders = useMemo(() => getCustomerOrders(slug, tableParam), [slug, tableParam]);
 
   useEffect(() => {
     const interval = setInterval(() => setClockNow(Date.now()), 1000);
@@ -124,8 +126,10 @@ export default function MyOrdersPage() {
   }, [socket, orders.map((order) => order.orderId).join('|'), slug]);
 
   const firstOrder = orders[0];
-  const menuUrl = firstOrder
-    ? `/menu/${slug}?table=${encodeURIComponent(firstOrder.tableNumber || '')}&key=${encodeURIComponent(firstOrder.tableToken || '')}&browse=1`
+  const menuTable = firstOrder?.tableNumber || tableParam;
+  const menuToken = firstOrder?.tableToken || '';
+  const menuUrl = menuTable
+    ? `/menu/${slug}?table=${encodeURIComponent(menuTable)}&key=${encodeURIComponent(menuToken)}&browse=1`
     : `/menu/${slug}`;
 
   return (
