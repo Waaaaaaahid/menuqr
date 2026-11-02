@@ -70,7 +70,8 @@ export default function CartDrawer({ restaurant, isOpen, onClose, onOpen }) {
         specialNotes: specialNotes || '',
         paymentMethod: 'cash',
         items: items.map((i) => ({
-          menuItemId: i._id,
+          menuItemId: i.menuItemId || i._id,
+          selectedSize: i.selectedSize || '',
           name: i.name,
           price: i.price,
           quantity: i.quantity,
@@ -206,7 +207,7 @@ export default function CartDrawer({ restaurant, isOpen, onClose, onOpen }) {
                                 {item.name}
                               </h4>
                               <p className="text-[11px] font-semibold text-slate-500">
-                                {formatCurrency(item.price, restaurant?.currency)} each
+                                {item.selectedSize ? item.selectedSize + ' · ' : ''}{formatCurrency(item.price, restaurant?.currency)} each
                               </p>
                               {item.specialInstructions && (
                                 <p className="text-[10px] text-brand-600 italic mt-0.5">
