@@ -31,7 +31,19 @@ export default function RegisterPage() {
       navigate('/setup');
     } catch (err) {
       console.error(err);
-      setError(err.response?.data?.message || 'Registration failed. Email might already be taken.');
+      if (err.response) {
+        // Show the actual API response instead of incorrectly blaming duplicate email.
+        setError(
+          err.response.data?.message ||
+          `Registration failed (HTTP ${err.response.status}). Please check the server response.`
+        );
+      } else if (err.request) {
+        setError(
+          'Could not reach the backend server. Check the VITE_API_URL on Vercel and CLIENT_URL on Render, then redeploy both services.'
+        );
+      } else {
+        setError(err.message || 'Registration could not be completed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
