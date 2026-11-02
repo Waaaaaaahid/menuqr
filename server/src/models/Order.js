@@ -84,6 +84,11 @@ const orderSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    prepTimeMinutes: { type: Number, default: 0, min: 0, max: 240 },
+    prepStartedAt: { type: Date, default: null },
+    prepEndsAt: { type: Date, default: null },
+    prepPausedAt: { type: Date, default: null },
+    prepRemainingSeconds: { type: Number, default: 0, min: 0 },
     status: {
       type: String,
       enum: ['pending', 'accepted', 'preparing', 'ready', 'completed', 'cancelled'],
