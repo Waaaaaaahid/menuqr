@@ -6,23 +6,28 @@ import { DietaryBadge, TagBadge } from '../common/Badge';
 export default function FoodDetailModal({ dish, currency, cartItem, isOpen, onClose, onAddToCart }) {
   const [qty, setQty] = useState(1);
   const [instructions, setInstructions] = useState('');
+  const [selectedSize, setSelectedSize] = useState('');
 
   useEffect(() => {
     if (cartItem) {
       setQty(cartItem.quantity || 1);
       setInstructions(cartItem.specialInstructions || '');
+      setSelectedSize(cartItem.selectedSize || dish?.sizeOptions?.[0]?.name || '');
     } else {
       setQty(1);
       setInstructions('');
+      setSelectedSize(dish?.sizeOptions?.[0]?.name || '');
     }
   }, [dish, cartItem, isOpen]);
 
   if (!isOpen || !dish) return null;
 
-  const totalPrice = dish.price * qty;
+  const selectedOption = (dish.sizeOptions || []).find((option) => option.name === selectedSize);
+  const unitPrice = selectedOption ? selectedOption.price : dish.price;
+  const totalPrice = unitPrice * qty;
 
   const handleAdd = () => {
-    onAddToCart(dish, qty, instructions);
+    onAddToCart(dish, qty, instructions, selectedSize);
     onClose();
   };
 
@@ -62,7 +67,7 @@ export default function FoodDetailModal({ dish, currency, cartItem, isOpen, onCl
               {dish.name}
             </h2>
             <p className="text-base font-extrabold text-brand-600 mt-1">
-              {formatCurrency(dish.price, currency)}
+              {formatCurrency(unitPrice, currency)}
             </p>
           </div>
 
@@ -74,6 +79,21 @@ export default function FoodDetailModal({ dish, currency, cartItem, isOpen, onCl
             <Clock className="w-4 h-4" />
             <span>Preparation time: {dish.preparationTime || '15-20 min'}</span>
           </div>
+
+          {dish.sizeOptions?.length > 0 && (
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-slate-700">Choose Size *</label>
+              <div className="grid grid-cols-3 gap-2">
+                {dish.sizeOptions.map((option) => (
+                  <button key={option.name} type="button" onClick={() => setSelectedSize(option.name)}
+                    className={"rounded-xl border p-3 text-left transition-all " + (selectedSize === option.name ? 'border-brand-500 bg-brand-50 ring-1 ring-brand-500' : 'border-slate-200 bg-white')}>
+                    <span className="block text-xs font-bold text-slate-900">{option.name}</span>
+                    <span className="block text-xs font-semibold text-brand-600 mt-1">{formatCurrency(option.price, currency)}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Special Instructions Input */}
           <div className="pt-2">
