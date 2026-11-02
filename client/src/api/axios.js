@@ -1,7 +1,9 @@
 import axios from 'axios';
 
+// Set VITE_API_URL on Vercel to the Render API URL, including /api.
+// Local development falls back to the Vite proxy path.
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_URL || '/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -24,7 +26,6 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      // Clear token if expired or unauthorized
       if (window.location.pathname.startsWith('/dashboard') || window.location.pathname.startsWith('/setup')) {
         localStorage.removeItem('menuqr_token');
         localStorage.removeItem('menuqr_user');
