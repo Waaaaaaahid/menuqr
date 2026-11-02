@@ -21,6 +21,18 @@ const SAMPLE_MENU = [
   { category: 'Ice Cream & Waffles', base: 89, items: ['Vanilla Ice Cream','Chocolate Ice Cream','Strawberry Ice Cream','Brownie with Ice Cream','Classic Waffle','Chocolate Waffle','Nutella Waffle','Belgian Chocolate Waffle','Oreo Waffle','Fruit Sundae'] },
 ];
 
+const getSampleSizes = (category, base, index) => {
+  const drink = ['Beverages', 'Shakes & Smoothies', 'Coffee & Matcha'].includes(category);
+  const pizza = category === 'Pizza';
+  if (!drink && !pizza) return [];
+  const regular = base + (index * 10);
+  return [
+    { name: 'Regular', price: regular },
+    { name: 'Medium', price: regular + (pizza ? 100 : 30) },
+    { name: 'Large', price: regular + (pizza ? 200 : 50) },
+  ];
+};
+
 const NON_VEG_WORDS = /chicken|mutton|fish|prawn|egg|pepperoni|seekh kebab/i;
 
 // @route POST /api/categories/import-sample-menu
@@ -33,6 +45,19 @@ const seedSampleMenuForRestaurant = async (restaurant) => {
     // Never replace a restaurant's real menu with demo dishes.
     const existingItemCount = await MenuItem.countDocuments({ restaurant: restaurantId });
     if (existingItemCount > 0) {
+      // Backfill size choices for sample items created by the earlier importer.
+      for (const group of SAMPLE_MENU) {
+        if (!['Pizza', 'Beverages', 'Shakes & Smoothies', 'Coffee & Matcha'].includes(group.category)) continue;
+        const category = await Category.findOne({ restaurant: restaurantId, name: group.category });
+        if (!category) continue;
+        for (let index = 0; index < group.items.length; index += 1) {
+          const item = await MenuItem.findOne({ restaurant: restaurantId, category: category._id, name: group.items[index] });
+          if (item && (!item.sizeOptions || item.sizeOptions.length === 0)) {
+            item.sizeOptions = getSampleSizes(group.category, group.base, index);
+            await item.save();
+          }
+        }
+      }
       const categoryCount = await Category.countDocuments({ restaurant: restaurantId });
       return { categoriesCreated: 0, itemsCreated: 0, totalCategories: categoryCount, totalItems: existingItemCount };
     }
@@ -85,6 +110,7 @@ const seedSampleMenuForRestaurant = async (restaurant) => {
             name,
             description: 'Freshly prepared and served with care.',
             price: group.base + (itemIndex * 10),
+            sizeOptions: getSampleSizes(group.category, group.base, itemIndex),
             isVeg: !NON_VEG_WORDS.test(name),
             isPopular: false,
             isBestseller: false,
