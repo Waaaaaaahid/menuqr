@@ -370,7 +370,7 @@ export const getOrderById = async (req, res, next) => {
     }
 
     const restaurant = await Restaurant.findById(order.restaurant).select(
-      'name slug logo currency phone'
+      'name slug logo currency phone googleReviewUrl'
     );
 
     res.status(200).json({
