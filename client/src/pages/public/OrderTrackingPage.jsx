@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   CheckCircle2,
@@ -17,6 +17,7 @@ import { useSocket } from '../../context/SocketContext';
 import { formatCurrency, formatRelativeTime, getOrderStatusInfo } from '../../utils/formatters';
 import { DietaryBadge } from '../../components/common/Badge';
 import { saveCustomerActiveOrder, clearCustomerActiveOrder, isCustomerOrderActive } from '../../utils/customerOrders';
+import { playCustomerReadyChime, unlockNotificationAudio } from '../../utils/notificationSounds';
 
 export default function OrderTrackingPage() {
   const { orderId } = useParams();
@@ -27,6 +28,7 @@ export default function OrderTrackingPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [clockNow, setClockNow] = useState(Date.now());
+  const previousStatusRef = useRef(null);
 
   useEffect(() => {
     const interval = setInterval(() => setClockNow(Date.now()), 1000);
@@ -40,6 +42,7 @@ export default function OrderTrackingPage() {
         const res = await api.get(`/public/orders/${orderId}`);
         if (res.data.success) {
           setOrder(res.data.order);
+          previousStatusRef.current = res.data.order.status;
           setRestaurant(res.data.restaurant);
           if (isCustomerOrderActive(res.data.order.status)) {
             saveCustomerActiveOrder(res.data.restaurant.slug, {
@@ -69,6 +72,17 @@ export default function OrderTrackingPage() {
     }
   }, [orderId]);
 
+  // Unlock audio after the customer's first tap/click/key press; browsers block unsolicited autoplay.
+  useEffect(() => {
+    const unlock = () => { unlockNotificationAudio(); };
+    window.addEventListener('pointerdown', unlock, { passive: true });
+    window.addEventListener('keydown', unlock);
+    return () => {
+      window.removeEventListener('pointerdown', unlock);
+      window.removeEventListener('keydown', unlock);
+    };
+  }, []);
+
   // Real-time socket listener for live order progression
   useEffect(() => {
     if (!socket || !orderId) return;
@@ -77,6 +91,10 @@ export default function OrderTrackingPage() {
 
     const handleStatusUpdate = (updatedOrder) => {
       if (updatedOrder._id === orderId) {
+        if (updatedOrder.status === 'ready' && previousStatusRef.current !== 'ready') {
+          playCustomerReadyChime();
+        }
+        previousStatusRef.current = updatedOrder.status;
         setOrder(updatedOrder);
         if (restaurant?.slug && isCustomerOrderActive(updatedOrder.status)) {
           saveCustomerActiveOrder(restaurant.slug, {
