@@ -46,6 +46,19 @@ export default function TableVerificationRequests() {
     }
   };
 
+  const reject = async (request) => {
+    try {
+      const response = await api.post(`/tables/${request.tableId}/reject-verification`);
+      if (response.data.success) {
+        addToast('Verification request rejected.', 'success');
+        fetchRequests();
+      }
+    } catch (error) {
+      addToast(error.response?.data?.message || 'Could not reject request.', 'error');
+      fetchRequests();
+    }
+  };
+
   if (!requests.length && !loading) return null;
 
   return (
@@ -77,6 +90,7 @@ export default function TableVerificationRequests() {
                 placeholder="Enter 6-digit OTP"
                 className="min-w-0 flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm tracking-widest font-bold"
               />
+              <button onClick={() => reject(request)} className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700 hover:bg-rose-100">Reject</button>
               <button onClick={() => verify(request)} className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-bold text-white hover:bg-emerald-700">Verify</button>
             </div>
           </div>
