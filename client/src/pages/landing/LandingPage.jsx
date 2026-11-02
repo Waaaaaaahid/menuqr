@@ -431,28 +431,28 @@ export default function LandingPage() {
           <div className="text-center max-w-2xl mx-auto space-y-3 mb-14">
             <span className="text-xs font-bold uppercase tracking-wider text-brand-600">Simple & transparent</span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Plans that grow with your cafe</h2>
-            <p className="text-sm text-slate-500">Start free. Upgrade whenever your restaurant needs more tools. All paid plans are billed monthly in INR.</p>
+            <p className="text-sm text-slate-500">Straightforward pricing in USD. Start with Basic, grow with Pro, or pay once for Lifetime access.</p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 max-w-6xl mx-auto">
             {[
-              { name: 'Free', price: '₹0', desc: 'For trying MenuQR', features: ['Digital menu', 'QR code for up to 5 tables', 'Up to 25 menu items'] },
-              { name: 'Normal', price: '₹299', desc: 'For small cafes', features: ['Everything in Free', 'Live order dashboard', 'Up to 10 tables'] },
-              { name: 'Medium', price: '₹599', desc: 'For growing restaurants', features: ['Everything in Normal', 'Unlimited tables', 'Kitchen order notifications', 'Basic analytics'] },
-              { name: 'Pro', price: '₹999', desc: 'For busy restaurants', features: ['Everything in Medium', 'Advanced analytics', 'Priority support', 'Custom branding'], popular: true },
+              { name: 'Basic', price: '$9', period: '/ month', desc: 'Everything to get started', features: ['Digital menu', 'QR codes for tables', 'Live order dashboard', 'Menu and price management'] },
+              { name: 'Pro', price: '$19', period: '/ month', desc: 'For growing restaurants', features: ['Everything in Basic', 'Unlimited tables and menu items', 'Kitchen order notifications', 'Advanced analytics', 'Priority support', 'Custom branding'], popular: true },
+              { name: 'Lifetime', price: '$299', period: ' one time', desc: 'One payment. Yours forever.', features: ['Everything in Pro', 'No monthly renewals', 'Lifetime access', 'Future core feature updates'], lifetime: true },
             ].map((plan) => (
-              <div key={plan.name} className={`relative p-7 rounded-3xl border flex flex-col ${plan.popular ? 'bg-slate-900 text-white border-brand-500 border-2 shadow-xl' : 'bg-white text-slate-900 border-slate-200 shadow-card'}`}>
+              <div key={plan.name} className={`relative p-7 rounded-3xl border flex flex-col ${plan.popular || plan.lifetime ? 'bg-slate-900 text-white border-brand-500 border-2 shadow-xl' : 'bg-white text-slate-900 border-slate-200 shadow-card'}`}>
                 {plan.popular && <span className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap px-3 py-1 rounded-full bg-brand-500 text-white text-[10px] font-extrabold uppercase">Most popular</span>}
-                <h3 className={`text-sm font-extrabold ${plan.popular ? 'text-brand-400' : 'text-slate-600'}`}>{plan.name}</h3>
-                <p className="mt-4 text-4xl font-black">{plan.price}<span className={`text-xs font-semibold ${plan.popular ? 'text-slate-400' : 'text-slate-500'}`}>{plan.name === 'Free' ? ' forever' : ' / month'}</span></p>
-                <p className={`mt-2 text-xs ${plan.popular ? 'text-slate-400' : 'text-slate-500'}`}>{plan.desc}</p>
-                <ul className={`mt-6 mb-7 space-y-3 border-t pt-5 flex-1 ${plan.popular ? 'border-slate-700' : 'border-slate-100'}`}>
-                  {plan.features.map((feature) => <li key={feature} className={`flex items-start gap-2 text-xs ${plan.popular ? 'text-slate-300' : 'text-slate-600'}`}><CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />{feature}</li>)}
+                {plan.lifetime && <span className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap px-3 py-1 rounded-full bg-amber-500 text-slate-950 text-[10px] font-extrabold uppercase">One-time ownership</span>}
+                <h3 className={`text-sm font-extrabold ${plan.popular || plan.lifetime ? 'text-brand-400' : 'text-slate-600'}`}>{plan.name}</h3>
+                <p className="mt-4 text-4xl font-black">{plan.price}<span className={`text-xs font-semibold ${plan.popular || plan.lifetime ? 'text-slate-400' : 'text-slate-500'}`}>{plan.period}</span></p>
+                <p className={`mt-2 text-xs ${plan.popular || plan.lifetime ? 'text-slate-400' : 'text-slate-500'}`}>{plan.desc}</p>
+                <ul className={`mt-6 mb-7 space-y-3 border-t pt-5 flex-1 ${plan.popular || plan.lifetime ? 'border-slate-700' : 'border-slate-100'}`}>
+                  {plan.features.map((feature) => <li key={feature} className={`flex items-start gap-2 text-xs ${plan.popular || plan.lifetime ? 'text-slate-300' : 'text-slate-600'}`}><CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />{feature}</li>)}
                 </ul>
-                <Link to="/register" className={`block text-center w-full py-3 rounded-xl text-xs font-extrabold transition-all ${plan.popular ? 'bg-brand-500 hover:bg-brand-600 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-800'}`}>Get Started</Link>
+                <Link to="/register" className={`block text-center w-full py-3 rounded-xl text-xs font-extrabold transition-all ${plan.popular || plan.lifetime ? 'bg-brand-500 hover:bg-brand-600 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-800'}`}>Get Started</Link>
               </div>
             ))}
           </div>
-          <p className="text-center text-[11px] text-slate-400 mt-7">Create your owner account first, then select or change your plan from Dashboard → Billing & Plans.</p>
+          <p className="text-center text-[11px] text-slate-400 mt-7">Create your owner account first, then select your plan from Dashboard → Billing & Plans.</p>
         </div>
       </section>
 
