@@ -17,6 +17,7 @@ import confetti from 'canvas-confetti';
 import { useCart } from '../../context/CartContext';
 import { formatCurrency } from '../../utils/formatters';
 import { DietaryBadge } from '../common/Badge';
+import { saveCustomerActiveOrder } from '../../utils/customerOrders';
 import api from '../../api/axios';
 import { useToast } from '../common/Toast';
 
@@ -91,10 +92,21 @@ export default function CartDrawer({ restaurant, isOpen, onClose, onOpen }) {
           });
         } catch (e) {}
 
+        const placedOrder = res.data.order;
+        saveCustomerActiveOrder(restaurant.slug, {
+          orderId: placedOrder._id,
+          orderNumber: placedOrder.orderNumber || '',
+          restaurantSlug: restaurant.slug,
+          restaurantName: restaurant.name,
+          tableNumber: activeTable,
+          tableToken,
+          status: placedOrder.status || 'pending',
+          savedAt: new Date().toISOString(),
+        });
         addToast('Order placed successfully! The kitchen is preparing your meal.', 'success', 5000);
         clearCart();
         onClose();
-        navigate(`/order/${res.data.order._id}`);
+        navigate(`/order/${placedOrder._id}`);
       }
     } catch (err) {
       console.error(err);
