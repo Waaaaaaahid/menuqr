@@ -161,11 +161,11 @@ export default function OrderTrackingPage() {
         <div className="flex items-center justify-between">
           {restaurant?.slug && (
             <Link
-              to={`/menu/${restaurant.slug}?table=${encodeURIComponent(order.table?.tableNumber || '')}&key=${encodeURIComponent(order.table?.qrToken || '')}&browse=1`}
+              to={`/orders/${restaurant.slug}`}
               className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 bg-white px-3 py-2 rounded-xl border border-slate-200 shadow-xs transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Back to Menu</span>
+              <span>All Orders</span>
             </Link>
           )}
           <span className="text-xs font-bold text-slate-400">{order.status === 'completed' ? 'Order Served' : 'Live Status Tracker'}</span>
