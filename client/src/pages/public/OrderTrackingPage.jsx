@@ -15,6 +15,7 @@ import api from '../../api/axios';
 import { useSocket } from '../../context/SocketContext';
 import { formatCurrency, formatRelativeTime, getOrderStatusInfo } from '../../utils/formatters';
 import { DietaryBadge } from '../../components/common/Badge';
+import { saveCustomerActiveOrder, clearCustomerActiveOrder, isCustomerOrderActive } from '../../utils/customerOrders';
 
 export default function OrderTrackingPage() {
   const { orderId } = useParams();
@@ -39,6 +40,20 @@ export default function OrderTrackingPage() {
         if (res.data.success) {
           setOrder(res.data.order);
           setRestaurant(res.data.restaurant);
+          if (isCustomerOrderActive(res.data.order.status)) {
+            saveCustomerActiveOrder(res.data.restaurant.slug, {
+              orderId: res.data.order._id,
+              orderNumber: res.data.order.orderNumber || '',
+              restaurantSlug: res.data.restaurant.slug,
+              restaurantName: res.data.restaurant.name,
+              tableNumber: res.data.order.table?.tableNumber || '',
+              tableToken: res.data.order.table?.qrToken || '',
+              status: res.data.order.status,
+              savedAt: new Date().toISOString(),
+            });
+          } else {
+            clearCustomerActiveOrder(res.data.restaurant.slug, res.data.order._id);
+          }
         }
       } catch (err) {
         setError('Order not found or has expired.');
@@ -62,6 +77,20 @@ export default function OrderTrackingPage() {
     const handleStatusUpdate = (updatedOrder) => {
       if (updatedOrder._id === orderId) {
         setOrder(updatedOrder);
+        if (restaurant?.slug && isCustomerOrderActive(updatedOrder.status)) {
+          saveCustomerActiveOrder(restaurant.slug, {
+            orderId: updatedOrder._id,
+            orderNumber: updatedOrder.orderNumber || '',
+            restaurantSlug: restaurant.slug,
+            restaurantName: restaurant.name,
+            tableNumber: updatedOrder.table?.tableNumber || '',
+            tableToken: updatedOrder.table?.qrToken || '',
+            status: updatedOrder.status,
+            savedAt: new Date().toISOString(),
+          });
+        } else if (restaurant?.slug) {
+          clearCustomerActiveOrder(restaurant.slug, updatedOrder._id);
+        }
       }
     };
 
