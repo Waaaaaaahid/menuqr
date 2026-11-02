@@ -21,6 +21,7 @@ import { formatCurrency, formatRelativeTime, getOrderStatusInfo } from '../../ut
 import { DietaryBadge } from '../../components/common/Badge';
 import EmptyState from '../../components/common/EmptyState';
 import { TableSkeleton } from '../../components/common/LoadingSkeleton';
+import TableVerificationRequests from '../../components/dashboard/TableVerificationRequests';
 
 export default function OrdersPage() {
   const { restaurant } = useAuth();
@@ -167,6 +168,8 @@ export default function OrdersPage() {
           </button>
         </div>
       </div>
+
+      <TableVerificationRequests />
 
       {/* Status Filter Tabs */}
       <div className="flex items-center gap-1.5 overflow-x-auto pb-2 scrollbar-none">
