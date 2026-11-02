@@ -43,6 +43,8 @@ export default function FoodCard({ dish, currency, cartItem, onAddToCart, onUpda
               <img
                 src={dish.image}
                 alt={dish.name}
+                loading="lazy"
+                decoding="async"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />
             ) : (
