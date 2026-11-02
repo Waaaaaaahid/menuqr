@@ -38,7 +38,7 @@ export const initSocket = (httpServer) => {
 
     socket.on('join_order', async (orderId) => {
       try {
-        if (!/^[a-f\\d]{24}$/i.test(String(orderId))) return;
+        if (!/^[a-f\d]{24}$/i.test(String(orderId))) return;
         const exists = await Order.exists({ _id: orderId });
         if (exists) socket.join(`order_${orderId}`);
       } catch (error) {
