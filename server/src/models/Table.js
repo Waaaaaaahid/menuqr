@@ -37,6 +37,16 @@ const tableSchema = new mongoose.Schema(
       ref: 'Order',
       default: null,
     },
+    session: {
+      status: { type: String, enum: ['none', 'pending', 'active'], default: 'none' },
+      customerName: { type: String, default: '' },
+      otpHash: { type: String, default: '' },
+      tokenHash: { type: String, default: '' },
+      expiresAt: { type: Date, default: null },
+      requestedAt: { type: Date, default: null },
+      verifiedAt: { type: Date, default: null },
+      attempts: { type: Number, default: 0 },
+    },
   },
   {
     timestamps: true,
