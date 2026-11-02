@@ -224,3 +224,18 @@ export const releaseTableSession = async (req, res, next) => {
     next(error);
   }
 };
+
+export const rejectTableSession = async (req, res, next) => {
+  try {
+    const table = await Table.findOne({ _id: req.params.id, restaurant: req.restaurant._id });
+    if (!table) return res.status(404).json({ success: false, message: 'Table not found.' });
+    if (table.session?.status !== 'pending') {
+      return res.status(409).json({ success: false, message: 'There is no pending verification to reject.' });
+    }
+    clearSession(table);
+    await table.save();
+    return res.status(200).json({ success: true, message: 'Verification request rejected.' });
+  } catch (error) {
+    next(error);
+  }
+};
