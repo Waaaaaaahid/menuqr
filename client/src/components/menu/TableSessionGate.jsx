@@ -104,8 +104,8 @@ export default function TableSessionGate({ restaurantSlug, tableNumber, tableKey
   if (!tableNumber || !tableKey || verified) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="w-full max-w-sm rounded-3xl bg-white shadow-2xl p-6 space-y-5">
+    <div className="relative z-30 max-w-md mx-auto px-4 pt-4">
+      <div className="w-full rounded-3xl bg-white border border-slate-200 shadow-card p-6 space-y-5">
         <div className="w-14 h-14 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center">
           <ShieldCheck className="w-7 h-7" />
         </div>
