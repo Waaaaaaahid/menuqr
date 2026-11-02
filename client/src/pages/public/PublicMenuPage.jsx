@@ -72,7 +72,7 @@ export default function PublicMenuPage() {
       if (savedOrder?.orderId && savedStatus === 'cancelled') {
         clearCustomerActiveOrder(slug, savedOrder.orderId);
       } else if (savedOrder?.orderId && !browseMenu) {
-        navigate(`/order/${savedOrder.orderId}`, { replace: true });
+        navigate(`/orders/${slug}`, { replace: true });
         return;
       } else if (savedOrder?.orderId && browseMenu) {
         setActiveOrder(savedOrder);
