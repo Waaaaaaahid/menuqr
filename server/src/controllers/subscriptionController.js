@@ -1,5 +1,4 @@
 import crypto from 'crypto';
-import Razorpay from 'razorpay';
 import Subscription from '../models/Subscription.js';
 
 const PLAN_CONFIG = {
@@ -15,7 +14,24 @@ const getRazorpay = () => {
     error.statusCode = 503;
     throw error;
   }
-  return new Razorpay({ key_id: process.env.RAZORPAY_KEY_ID, key_secret: process.env.RAZORPAY_KEY_SECRET });
+  return true;
+};
+
+const razorpayRequest = async (endpoint, method = 'GET', body) => {
+  getRazorpay();
+  const auth = Buffer.from(`${process.env.RAZORPAY_KEY_ID}:${process.env.RAZORPAY_KEY_SECRET}`).toString('base64');
+  const response = await fetch(`https://api.razorpay.com/v1/${endpoint}`, {
+    method,
+    headers: { Authorization: `Basic ${auth}`, 'Content-Type': 'application/json' },
+    ...(body ? { body: JSON.stringify(body) } : {}),
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    const error = new Error(data.error?.description || 'Razorpay API request failed.');
+    error.statusCode = response.status;
+    throw error;
+  }
+  return data;
 };
 
 export const getPlans = (req, res) => {
@@ -41,12 +57,12 @@ export const createCheckout = async (req, res, next) => {
       return res.json({ success: true, free: true, subscription });
     }
 
-    const razorpay = getRazorpay();
+    getRazorpay();
     // Razorpay Plans are created once and reused for future subscribers.
     let planRecord = await Subscription.db.collection('razorpayplans').findOne({ planKey });
     let razorpayPlanId = planRecord?.razorpayPlanId;
     if (!razorpayPlanId) {
-      const createdPlan = await razorpay.plans.create({
+      const createdPlan = await razorpayRequest('plans', 'POST', {
         period: 'monthly',
         interval: 1,
         item: { name: `MenuQR ${config.name} Monthly`, amount: config.amount, currency: 'INR', description: `MenuQR ${config.name} subscription` },
@@ -57,7 +73,7 @@ export const createCheckout = async (req, res, next) => {
       );
     }
 
-    const created = await razorpay.subscriptions.create({
+    const created = await razorpayRequest('subscriptions', 'POST', {
       plan_id: razorpayPlanId,
       total_count: 120,
       quantity: 1,
