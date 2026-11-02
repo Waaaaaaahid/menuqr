@@ -18,6 +18,8 @@ import tableRoutes from './routes/tableRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
 import publicRoutes from './routes/publicRoutes.js';
+import subscriptionRoutes from './routes/subscriptionRoutes.js';
+import { handleRazorpayWebhook } from './controllers/subscriptionController.js';
 
 dotenv.config();
 
@@ -34,6 +36,8 @@ app.use(cors({
   origin: clientOrigin || '*',
   credentials: Boolean(clientOrigin),
 }));
+// Razorpay signs the exact raw webhook payload, so this route must run before express.json().
+app.post('/api/subscriptions/webhook', express.raw({ type: 'application/json' }), handleRazorpayWebhook);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -66,6 +70,7 @@ app.use('/api/tables', tableRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/public', publicRoutes);
+app.use('/api/subscriptions', subscriptionRoutes);
 
 // Serve Client Static Build if available (SPA support)
 const clientDistPath = path.resolve('../client/dist');
