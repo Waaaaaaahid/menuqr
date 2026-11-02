@@ -21,6 +21,7 @@ import { formatCurrency, formatRelativeTime, getOrderStatusInfo } from '../../ut
 import { DietaryBadge } from '../../components/common/Badge';
 import EmptyState from '../../components/common/EmptyState';
 import { TableSkeleton } from '../../components/common/LoadingSkeleton';
+import { playAdminNewOrderBell } from '../../utils/notificationSounds';
 
 export default function OrdersPage() {
   const { restaurant } = useAuth();
@@ -64,22 +65,7 @@ export default function OrdersPage() {
     const handleNewOrder = (newOrder) => {
       setOrders((prev) => [newOrder, ...prev]);
 
-      if (soundEnabled) {
-        try {
-          const ctx = new (window.AudioContext || window.webkitAudioContext)();
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          osc.frequency.setValueAtTime(523.25, ctx.currentTime);
-          osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.15);
-          osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.3);
-          gain.gain.setValueAtTime(0.2, ctx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
-          osc.start();
-          osc.stop(ctx.currentTime + 0.6);
-        } catch (e) {}
-      }
+      if (soundEnabled) playAdminNewOrderBell();
     };
 
     const handleOrderUpdate = (updatedOrder) => {
