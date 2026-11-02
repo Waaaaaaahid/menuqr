@@ -88,8 +88,17 @@ export const placeOrder = async (req, res, next) => {
         });
       }
 
+      const selectedSize = item.selectedSize ? String(item.selectedSize).trim() : '';
+      let unitPrice = dbItem.price;
+      if (dbItem.sizeOptions?.length) {
+        const matchedSize = dbItem.sizeOptions.find((option) => option.name.toLowerCase() === selectedSize.toLowerCase());
+        if (!matchedSize) return res.status(400).json({ success: false, message: 'Please select a valid size for ' + dbItem.name + '.' });
+        unitPrice = matchedSize.price;
+      } else if (selectedSize) {
+        return res.status(400).json({ success: false, message: 'Size selection is not available for ' + dbItem.name + '.' });
+      }
       const quantity = Math.max(1, Number(item.quantity) || 1);
-      const itemTotal = dbItem.price * quantity;
+      const itemTotal = unitPrice * quantity;
       subtotal += itemTotal;
       const prepRange = String(dbItem.preparationTime || '15').match(/\d+/g) || ['15'];
       const itemPrepMinutes = Math.max(1, Number(prepRange[prepRange.length - 1]) || 15);
@@ -99,7 +108,8 @@ export const placeOrder = async (req, res, next) => {
       verifiedOrderItems.push({
         menuItem: dbItem._id,
         name: dbItem.name,
-        price: dbItem.price,
+        price: unitPrice,
+        selectedSize,
         quantity,
         specialInstructions: item.specialInstructions || '',
         isVeg: dbItem.isVeg,
