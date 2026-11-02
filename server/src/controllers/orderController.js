@@ -1,3 +1,4 @@
+import { createHash, timingSafeEqual } from 'crypto';
 import Order from '../models/Order.js';
 import Restaurant from '../models/Restaurant.js';
 import Table from '../models/Table.js';
@@ -6,6 +7,14 @@ import MenuAnalytics from '../models/MenuAnalytics.js';
 import { getIO } from '../socket/socketHandler.js';
 
 // Helper to generate readable order number
+const hashSessionToken = (value) => createHash('sha256').update(String(value || '')).digest('hex');
+const safeHashMatch = (value, expectedHash) => {
+  if (!value || !expectedHash) return false;
+  const actual = Buffer.from(hashSessionToken(value), 'hex');
+  const expected = Buffer.from(expectedHash, 'hex');
+  return actual.length === expected.length && timingSafeEqual(actual, expected);
+};
+
 const generateOrderNumber = () => {
   const chars = '0123456789';
   let rand = '';
@@ -24,6 +33,7 @@ export const placeOrder = async (req, res, next) => {
       restaurantSlug,
       tableNumber,
       tableKey,
+      tableSessionToken,
       customerName,
       customerPhone,
       items,
@@ -60,6 +70,9 @@ export const placeOrder = async (req, res, next) => {
     const tableDoc = await Table.findOne({ restaurant: restaurant._id, tableNumber: tableNumber.trim(), qrToken: tableKey });
     if (!tableDoc) {
       return res.status(403).json({ success: false, message: 'This table QR code is invalid. Please scan the QR displayed on your table.' });
+    }
+    if (tableDoc.session?.status !== 'active' || !safeHashMatch(tableSessionToken, tableDoc.session?.tokenHash)) {
+      return res.status(403).json({ success: false, message: 'Please verify your table with restaurant staff before placing an order.' });
     }
 
     // Fetch and verify all items server-side to guarantee accurate pricing
@@ -135,7 +148,7 @@ export const placeOrder = async (req, res, next) => {
         qrToken: tableDoc.qrToken,
       },
       customer: {
-        name: customerName ? customerName.trim() : 'Guest',
+        name: tableDoc.session.customerName || (customerName ? customerName.trim() : 'Guest'),
         phone: customerPhone ? customerPhone.trim() : '',
       },
       items: verifiedOrderItems,
@@ -276,10 +289,13 @@ export const updateOrderStatus = async (req, res, next) => {
 
     // Release table if completed or cancelled
     if (order.table?.id && (status === 'completed' || status === 'cancelled')) {
-      await Table.findByIdAndUpdate(order.table.id, {
-        status: 'available',
-        activeOrder: null,
-      });
+      const tableDoc = await Table.findById(order.table.id);
+      if (tableDoc) {
+        tableDoc.activeOrder = null;
+        // Keep the table occupied until staff explicitly releases its verified session.
+        tableDoc.status = tableDoc.session?.status === 'active' ? 'occupied' : 'available';
+        await tableDoc.save();
+      }
     }
 
     // Broadcast real-time update
