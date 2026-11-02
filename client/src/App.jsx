@@ -25,6 +25,7 @@ import ProfilePage from './pages/dashboard/ProfilePage';
 // Public Customer Menu & Order Tracking
 import PublicMenuPage from './pages/public/PublicMenuPage';
 import OrderTrackingPage from './pages/public/OrderTrackingPage';
+import MyOrdersPage from './pages/public/MyOrdersPage';
 
 export default function App() {
   return (
@@ -42,6 +43,7 @@ export default function App() {
 
                 {/* Customer Public Menu & Live Order Tracker */}
                 <Route path="/menu/:slug" element={<PublicMenuPage />} />
+                <Route path="/orders/:slug" element={<MyOrdersPage />} />
                 <Route path="/order/:orderId" element={<OrderTrackingPage />} />
 
                 {/* Protected Restaurant Owner Dashboard */}
