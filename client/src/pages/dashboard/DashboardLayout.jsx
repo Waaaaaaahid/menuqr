@@ -82,12 +82,18 @@ export default function DashboardLayout() {
         .catch(() => {});
     };
 
+    const handleTableSessionRequested = (request) => {
+      addToast(`Table verification: ${request.customerName} at ${request.tableNumber}. Open Orders to verify their OTP.`, 'warning', 8000);
+    };
+
     socket.on('new_order', handleNewOrder);
     socket.on('order_status_updated', handleStatusUpdated);
+    socket.on('table_session_requested', handleTableSessionRequested);
 
     return () => {
       socket.off('new_order', handleNewOrder);
       socket.off('order_status_updated', handleStatusUpdated);
+      socket.off('table_session_requested', handleTableSessionRequested);
     };
   }, [socket, addToast]);
 
