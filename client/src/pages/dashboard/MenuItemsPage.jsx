@@ -29,6 +29,7 @@ export default function MenuItemsPage() {
   const [items, setItems] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [sampleMenuLoading, setSampleMenuLoading] = useState(false);
 
   // Filters
   const [search, setSearch] = useState('');
@@ -70,6 +71,29 @@ export default function MenuItemsPage() {
       addToast('Failed to load menu items', 'error');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleImportSampleMenu = async () => {
+    const confirmed = window.confirm(
+      'Add a sample menu with 16 categories and up to 160 dishes at placeholder INR prices? Existing menu items and orders will not be deleted or overwritten. You can edit the sample dishes and prices afterward.'
+    );
+    if (!confirmed) return;
+
+    try {
+      setSampleMenuLoading(true);
+      const res = await api.post('/categories/import-sample-menu');
+      if (res.data.success) {
+        await fetchData();
+        addToast(
+          `Added ${res.data.categoriesCreated} categories and ${res.data.itemsCreated} sample dishes. Review prices before publishing.`,
+          'success'
+        );
+      }
+    } catch (err) {
+      addToast(err.response?.data?.message || 'Could not import the sample menu', 'error');
+    } finally {
+      setSampleMenuLoading(false);
     }
   };
 
@@ -220,13 +244,23 @@ export default function MenuItemsPage() {
             Create, update pricing, upload images, and control dish availability in real-time.
           </p>
         </div>
-        <button
-          onClick={openAddModal}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-semibold text-xs shadow-md shadow-brand-500/20 transition-all hover:scale-[1.02] active:scale-[0.98] self-start sm:self-auto"
-        >
-          <Plus className="w-4 h-4" />
-          Add Food Item
-        </button>
+        <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+          <button
+            onClick={handleImportSampleMenu}
+            disabled={sampleMenuLoading}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-brand-200 bg-brand-50 hover:bg-brand-100 text-brand-700 font-semibold text-xs transition-all disabled:opacity-60"
+          >
+            <Sparkles className="w-4 h-4" />
+            {sampleMenuLoading ? 'Adding Sample Menu...' : 'Add Sample Menu'}
+          </button>
+          <button
+            onClick={openAddModal}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-semibold text-xs shadow-md shadow-brand-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+          >
+            <Plus className="w-4 h-4" />
+            Add Food Item
+          </button>
+        </div>
       </div>
 
       {/* Filter and Search Bar */}
