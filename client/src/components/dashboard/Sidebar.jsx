@@ -9,6 +9,7 @@ import {
   BarChart3,
   Store,
   UserCheck,
+  CreditCard,
   ExternalLink,
   ChevronLeft,
   ChevronRight,
@@ -33,6 +34,7 @@ export default function Sidebar({ isOpen, setIsOpen, pendingOrdersCount = 0 }) {
     { name: 'Analytics', to: '/dashboard/analytics', icon: BarChart3 },
     { name: 'Restaurant Settings', to: '/dashboard/settings', icon: Store },
     { name: 'Account Profile', to: '/dashboard/profile', icon: UserCheck },
+    { name: 'Billing & Plans', to: '/dashboard/billing', icon: CreditCard },
   ];
 
   return (

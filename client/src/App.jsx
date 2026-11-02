@@ -21,6 +21,7 @@ import TablesPage from './pages/dashboard/TablesPage';
 import AnalyticsPage from './pages/dashboard/AnalyticsPage';
 import SettingsPage from './pages/dashboard/SettingsPage';
 import ProfilePage from './pages/dashboard/ProfilePage';
+import BillingPage from './pages/dashboard/BillingPage';
 
 // Public Customer Menu & Order Tracking
 import PublicMenuPage from './pages/public/PublicMenuPage';
@@ -56,6 +57,7 @@ export default function App() {
                   <Route path="analytics" element={<AnalyticsPage />} />
                   <Route path="settings" element={<SettingsPage />} />
                   <Route path="profile" element={<ProfilePage />} />
+                  <Route path="billing" element={<BillingPage />} />
                 </Route>
 
                 {/* Catch-all redirect */}

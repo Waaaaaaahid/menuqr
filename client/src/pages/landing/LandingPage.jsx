@@ -428,153 +428,31 @@ export default function LandingPage() {
       {/* Pricing Section */}
       <section id="pricing" className="py-20 bg-white border-y border-slate-200/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto space-y-3 mb-16">
-            <span className="text-xs font-bold uppercase tracking-wider text-brand-600">
-              Simple & Transparent
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-              Start Free, Scale as You Grow
-            </h2>
-            <p className="text-sm text-slate-500">
-              No hidden fees. Every plan includes real-time order synchronization.
-            </p>
+          <div className="text-center max-w-2xl mx-auto space-y-3 mb-14">
+            <span className="text-xs font-bold uppercase tracking-wider text-brand-600">Simple & transparent</span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Plans that grow with your cafe</h2>
+            <p className="text-sm text-slate-500">Straightforward pricing in USD. Start with Basic, grow with Pro, or pay once for Lifetime access.</p>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {/* Starter Plan */}
-            <div className="p-8 rounded-3xl bg-white border border-slate-200/80 shadow-card flex flex-col justify-between space-y-6">
-              <div className="space-y-4">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Starter
-                </span>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-black text-slate-900">$0</span>
-                  <span className="text-xs text-slate-500 font-bold">/ month forever</span>
-                </div>
-                <p className="text-xs text-slate-500">
-                  Ideal for small cafes, food trucks, and pop-up eateries.
-                </p>
-
-                <ul className="space-y-2.5 pt-4 border-t border-slate-100 text-xs text-slate-600">
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                    Up to 25 menu dishes
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                    Up to 5 dining tables
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                    Real-time KOT order stream
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                    High-res QR code downloads
-                  </li>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 max-w-6xl mx-auto">
+            {[
+              { name: 'Basic', price: '$9', period: '/ month', desc: 'Everything to get started', features: ['Digital menu', 'QR codes for tables', 'Live order dashboard', 'Menu and price management'] },
+              { name: 'Pro', price: '$19', period: '/ month', desc: 'For growing restaurants', features: ['Everything in Basic', 'Unlimited tables and menu items', 'Kitchen order notifications', 'Advanced analytics', 'Priority support', 'Custom branding'], popular: true },
+              { name: 'Lifetime', price: '$299', period: ' one time', desc: 'One payment. Yours forever.', features: ['Everything in Pro', 'No monthly renewals', 'Lifetime access', 'Future core feature updates'], lifetime: true },
+            ].map((plan) => (
+              <div key={plan.name} className={`relative p-7 rounded-3xl border flex flex-col ${plan.popular || plan.lifetime ? 'bg-slate-900 text-white border-brand-500 border-2 shadow-xl' : 'bg-white text-slate-900 border-slate-200 shadow-card'}`}>
+                {plan.popular && <span className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap px-3 py-1 rounded-full bg-brand-500 text-white text-[10px] font-extrabold uppercase">Most popular</span>}
+                {plan.lifetime && <span className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap px-3 py-1 rounded-full bg-amber-500 text-slate-950 text-[10px] font-extrabold uppercase">One-time ownership</span>}
+                <h3 className={`text-sm font-extrabold ${plan.popular || plan.lifetime ? 'text-brand-400' : 'text-slate-600'}`}>{plan.name}</h3>
+                <p className="mt-4 text-4xl font-black">{plan.price}<span className={`text-xs font-semibold ${plan.popular || plan.lifetime ? 'text-slate-400' : 'text-slate-500'}`}>{plan.period}</span></p>
+                <p className={`mt-2 text-xs ${plan.popular || plan.lifetime ? 'text-slate-400' : 'text-slate-500'}`}>{plan.desc}</p>
+                <ul className={`mt-6 mb-7 space-y-3 border-t pt-5 flex-1 ${plan.popular || plan.lifetime ? 'border-slate-700' : 'border-slate-100'}`}>
+                  {plan.features.map((feature) => <li key={feature} className={`flex items-start gap-2 text-xs ${plan.popular || plan.lifetime ? 'text-slate-300' : 'text-slate-600'}`}><CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />{feature}</li>)}
                 </ul>
+                <Link to="/register" className={`block text-center w-full py-3 rounded-xl text-xs font-extrabold transition-all ${plan.popular || plan.lifetime ? 'bg-brand-500 hover:bg-brand-600 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-800'}`}>Get Started</Link>
               </div>
-
-              <Link
-                to="/register"
-                className="w-full py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs text-center transition-all"
-              >
-                Get Started Free
-              </Link>
-            </div>
-
-            {/* Pro Plan (Featured) */}
-            <div className="p-8 rounded-3xl bg-slate-900 text-white border-2 border-brand-500 shadow-2xl relative flex flex-col justify-between space-y-6 -translate-y-2">
-              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-brand-500 text-white text-[10px] font-extrabold uppercase tracking-wider shadow-md">
-                Most Popular for Restaurants
-              </div>
-
-              <div className="space-y-4">
-                <span className="text-xs font-bold text-brand-400 uppercase tracking-wider">
-                  Professional
-                </span>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-black text-white">$29</span>
-                  <span className="text-xs text-slate-400 font-bold">/ month</span>
-                </div>
-                <p className="text-xs text-slate-400">
-                  For growing restaurants wanting full table ordering & deep analytics.
-                </p>
-
-                <ul className="space-y-2.5 pt-4 border-t border-slate-800 text-xs text-slate-300">
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-brand-400 flex-shrink-0" />
-                    Unlimited food dishes & categories
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-brand-400 flex-shrink-0" />
-                    Unlimited dining tables
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-brand-400 flex-shrink-0" />
-                    Printable Table Tent Card generator
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-brand-400 flex-shrink-0" />
-                    Live audio order notifications
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-brand-400 flex-shrink-0" />
-                    Full 30-day sales & visit analytics
-                  </li>
-                </ul>
-              </div>
-
-              <Link
-                to="/register"
-                className="w-full py-3.5 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-extrabold text-xs text-center shadow-lg shadow-brand-500/30 transition-all hover:scale-[1.02]"
-              >
-                Start 14-Day Free Trial
-              </Link>
-            </div>
-
-            {/* Enterprise Plan */}
-            <div className="p-8 rounded-3xl bg-white border border-slate-200/80 shadow-card flex flex-col justify-between space-y-6">
-              <div className="space-y-4">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Enterprise
-                </span>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-black text-slate-900">$79</span>
-                  <span className="text-xs text-slate-500 font-bold">/ month</span>
-                </div>
-                <p className="text-xs text-slate-500">
-                  For restaurant groups, hotel chains, and multi-location franchises.
-                </p>
-
-                <ul className="space-y-2.5 pt-4 border-t border-slate-100 text-xs text-slate-600">
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                    Multiple restaurant locations
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                    Custom domain & branding
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                    Staff role-based access
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                    Priority 24/7 dedicated support
-                  </li>
-                </ul>
-              </div>
-
-              <Link
-                to="/register"
-                className="w-full py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs text-center transition-all"
-              >
-                Contact Sales
-              </Link>
-            </div>
+            ))}
           </div>
+          <p className="text-center text-[11px] text-slate-400 mt-7">Create your owner account first, then select your plan from Dashboard → Billing & Plans.</p>
         </div>
       </section>
 
