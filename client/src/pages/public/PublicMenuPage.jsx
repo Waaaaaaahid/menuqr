@@ -17,6 +17,7 @@ export default function PublicMenuPage() {
   const navigate = useNavigate();
   const tableParam = searchParams.get('table');
   const tableKey = searchParams.get('key');
+  const browseMenu = searchParams.get('browse') === '1';
 
   const {
     setRestaurantSlug,
@@ -92,7 +93,7 @@ export default function PublicMenuPage() {
 
   // Restore and verify this customer's active order on this device.
   useEffect(() => {
-    if (!restaurant || !slug) return;
+    if (!restaurant || !slug || browseMenu) return;
     const savedOrder = getCustomerActiveOrder(slug);
     if (!savedOrder?.orderId) {
       setActiveOrder(null);
@@ -131,7 +132,7 @@ export default function PublicMenuPage() {
       });
 
     return () => { isMounted = false; };
-  }, [restaurant, slug, navigate]);
+  }, [restaurant, slug, navigate, browseMenu]);
 
   const scrollToCategory = (catId) => {
     setActiveCategory(catId);
