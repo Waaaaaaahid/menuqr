@@ -51,7 +51,7 @@ export default function TableSessionGate({ restaurantSlug, tableNumber, tableKey
           setVerified(true);
           setOtp('');
           localStorage.setItem(key, JSON.stringify({ sessionToken: savedSession.sessionToken, otp: '', customerName: savedSession.customerName }));
-        } else if (response.data.status === 'expired') {
+        } else if (response.data.status === 'expired' || response.data.status === 'none') {
           localStorage.removeItem(key);
           setSavedSession(null);
           setOtp('');
