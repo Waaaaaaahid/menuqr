@@ -1,6 +1,7 @@
 import { createHash, randomBytes, randomInt, timingSafeEqual } from 'crypto';
 import Restaurant from '../models/Restaurant.js';
 import Table from '../models/Table.js';
+import Order from '../models/Order.js';
 import { getIO } from '../socket/socketHandler.js';
 
 const hashValue = (value) => createHash('sha256').update(String(value || '')).digest('hex');
@@ -192,6 +193,14 @@ export const releaseTableSession = async (req, res, next) => {
   try {
     const table = await Table.findOne({ _id: req.params.id, restaurant: req.restaurant._id });
     if (!table) return res.status(404).json({ success: false, message: 'Table not found.' });
+    const unfinishedOrder = await Order.exists({
+      restaurant: req.restaurant._id,
+      'table.id': table._id,
+      status: { $in: ['pending', 'accepted', 'preparing', 'ready'] },
+    });
+    if (unfinishedOrder) {
+      return res.status(409).json({ success: false, message: 'This table still has an unfinished order. Complete or cancel it before releasing the session.' });
+    }
     clearSession(table);
     table.status = 'available';
     table.activeOrder = null;
