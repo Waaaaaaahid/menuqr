@@ -7,6 +7,7 @@ import MenuItem from '../models/MenuItem.js';
 import Table from '../models/Table.js';
 import { processUploadedFile } from '../middleware/upload.js';
 import { generateTableQRCode } from '../utils/qrGenerator.js';
+import { ensureSampleMenuForRestaurant } from './sampleMenuController.js';
 
 // Helper to generate unique slug
 const generateUniqueSlug = async (name) => {
@@ -270,6 +271,9 @@ export const getPublicMenu = async (req, res, next) => {
       });
       if (!tableInfo) return res.status(403).json({ success: false, message: 'Invalid table QR code. Please scan the QR displayed on your table.' });
     }
+
+    // First-time QR visitors should never land on an empty menu.
+    await ensureSampleMenuForRestaurant(restaurant);
 
     // Fetch active categories sorted by displayOrder
     const categories = await Category.find({
