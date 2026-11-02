@@ -5,7 +5,7 @@ import MenuItem from '../models/MenuItem.js';
 const SAMPLE_MENU = [
   { category: 'Starters & Appetizers', base: 99, items: ['Paneer Tikka','Chicken Tikka','Crispy Corn','Veg Spring Rolls','Chilli Paneer','Chicken Lollipop','Hara Bhara Kebab','Fish Fingers','Cheese Balls','Peri Peri Mushroom'] },
   { category: 'Main Course', base: 169, items: ['Paneer Butter Masala','Dal Makhani','Shahi Paneer','Butter Chicken','Chicken Curry','Kadhai Paneer','Veg Kolhapuri','Mutton Rogan Josh','Chole Masala','Egg Curry'] },
-  { category: 'Beverages', base: 49, items: ['Fresh Lime Soda','Classic Lemonade','Mint Mojito',' masala Chaas','Iced Tea','Cold Coffee','Blue Lagoon','Watermelon Cooler','Virgin Mary','Coconut Water'] },
+  { category: 'Beverages', base: 49, items: ['Fresh Lime Soda','Classic Lemonade','Mint Mojito','Masala Chaas','Iced Tea','Cold Coffee','Blue Lagoon','Watermelon Cooler','Virgin Mary','Coconut Water'] },
   { category: 'Desserts', base: 89, items: ['Gulab Jamun','Rasmalai','Brownie','Chocolate Lava Cake','Cheesecake','Gajar Halwa','Moong Dal Halwa','Tiramisu','Apple Pie','Red Velvet Pastry'] },
   { category: 'Burgers & Sliders', base: 99, items: ['Classic Veg Burger','Aloo Tikki Burger','Crispy Chicken Burger','Paneer Burger','Double Cheese Burger','BBQ Chicken Burger','Mushroom Swiss Burger','Peri Peri Veg Burger','Zinger Burger','Mini Cheese Sliders'] },
   { category: 'Pizza', base: 179, items: ['Margherita Pizza','Farmhouse Pizza','Paneer Tikka Pizza','Double Cheese Pizza','Corn & Cheese Pizza','Pepperoni Pizza','Chicken Tikka Pizza','BBQ Chicken Pizza','Veggie Supreme Pizza','Peri Peri Paneer Pizza'] },
@@ -29,6 +29,9 @@ const NON_VEG_WORDS = /chicken|mutton|fish|prawn|egg|pepperoni|seekh kebab/i;
 export const importSampleMenu = async (req, res, next) => {
   try {
     const restaurantId = req.restaurant._id;
+    // The owner approved INR sample pricing for this India-based demo menu.
+    req.restaurant.currency = { symbol: '₹', code: 'INR', position: 'before' };
+    await req.restaurant.save();
     let categoriesCreated = 0;
     let itemsCreated = 0;
 
