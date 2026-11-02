@@ -7,7 +7,6 @@ import MenuItem from '../models/MenuItem.js';
 import Table from '../models/Table.js';
 import { processUploadedFile } from '../middleware/upload.js';
 import { generateTableQRCode } from '../utils/qrGenerator.js';
-import { ensureSampleMenuForRestaurant } from './sampleMenuController.js';
 
 // Helper to generate unique slug
 const generateUniqueSlug = async (name) => {
@@ -275,22 +274,28 @@ export const getPublicMenu = async (req, res, next) => {
       if (!tableInfo) return res.status(403).json({ success: false, message: 'Invalid table QR code. Please scan the QR displayed on your table.' });
     }
 
-    // First-time QR visitors should never land on an empty menu.
-    await ensureSampleMenuForRestaurant(restaurant);
+    // Keep the customer-facing request read-only and fast. Sample/demo menu
+    // creation belongs in the owner setup flow, never on a customer's QR scan.
+    // Fetch categories and dishes together to avoid serial database round trips.
+    const [categories, menuItems] = await Promise.all([
+      Category.find({
+        restaurant: restaurant._id,
+        isActive: true,
+      })
+        .sort({ displayOrder: 1, name: 1 })
+        .lean(),
+      MenuItem.find({
+        restaurant: restaurant._id,
+        isAvailable: true,
+      })
+        .populate('category', 'name displayOrder')
+        .sort({ displayOrder: 1, name: 1 })
+        .lean(),
+    ]);
 
-    // Fetch active categories sorted by displayOrder
-    const categories = await Category.find({
-      restaurant: restaurant._id,
-      isActive: true,
-    }).sort({ displayOrder: 1, name: 1 });
-
-    // Fetch active menu items
-    const menuItems = await MenuItem.find({
-      restaurant: restaurant._id,
-      isAvailable: true,
-    })
-      .populate('category', 'name displayOrder')
-      .sort({ displayOrder: 1, name: 1 });
+    // A short private browser cache makes repeat QR visits feel instant while
+    // ensuring one customer's table details are never shared with another.
+    res.set('Cache-Control', 'private, max-age=10, stale-while-revalidate=30');
 
     res.status(200).json({
       success: true,
