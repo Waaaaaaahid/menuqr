@@ -25,6 +25,10 @@ const menuItemSchema = new mongoose.Schema(
       trim: true,
       default: '',
     },
+    sizeOptions: [{
+      name: { type: String, required: true, trim: true },
+      price: { type: Number, required: true, min: 0 },
+    }],
     price: {
       type: Number,
       required: [true, 'Price is required'],
