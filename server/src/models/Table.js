@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { randomBytes } from 'crypto';
 
 const tableSchema = new mongoose.Schema(
   {
@@ -8,6 +9,7 @@ const tableSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
+    qrToken: { type: String, default: () => randomBytes(24).toString('hex'), unique: true, index: true },
     tableNumber: {
       type: String,
       required: [true, 'Table number or identifier is required'],
