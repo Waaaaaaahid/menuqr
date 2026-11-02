@@ -302,10 +302,10 @@ export default function PublicMenuPage() {
         <FoodDetailModal
           dish={selectedDishDetail}
           currency={restaurant.currency}
-          cartItem={cartItems.find((i) => i._id === selectedDishDetail._id)}
+          cartItem={cartItems.find((i) => (i.menuItemId || i._id) === selectedDishDetail._id)}
           isOpen={!!selectedDishDetail}
           onClose={() => setSelectedDishDetail(null)}
-          onAddToCart={(d, q, inst) => addToCart(d, q, inst)}
+          onAddToCart={(d, q, inst, size) => addToCart(d, q, inst, size)}
         />
       )}
 
