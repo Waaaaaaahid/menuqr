@@ -31,5 +31,7 @@ export const clearCustomerActiveOrder = (restaurantSlug, orderId) => {
   }
 };
 
+// Keep the latest served order on this device so a fresh QR scan can reopen
+// its receipt/review screen. Only cancelled orders are discarded.
 export const isCustomerOrderActive = (status) =>
-  !['completed', 'cancelled'].includes(String(status || '').toLowerCase());
+  String(status || '').toLowerCase() !== 'cancelled';
