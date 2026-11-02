@@ -14,6 +14,7 @@ export default function SettingsPage() {
     description: '',
     cuisine: '',
     phone: '',
+    googleReviewUrl: '',
     email: '',
     openingHours: '',
     announcement: '',
@@ -38,6 +39,7 @@ export default function SettingsPage() {
         description: restaurant.description || '',
         cuisine: Array.isArray(restaurant.cuisine) ? restaurant.cuisine.join(', ') : '',
         phone: restaurant.phone || '',
+        googleReviewUrl: restaurant.googleReviewUrl || '',
         email: restaurant.email || '',
         openingHours: restaurant.openingHours || '',
         announcement: restaurant.announcement || '',
@@ -87,6 +89,7 @@ export default function SettingsPage() {
         description: formData.description,
         cuisine: formData.cuisine.split(',').map((c) => c.trim()).filter(Boolean),
         phone: formData.phone,
+        googleReviewUrl: formData.googleReviewUrl,
         email: formData.email,
         openingHours: formData.openingHours,
         announcement: formData.announcement,
@@ -340,6 +343,18 @@ export default function SettingsPage() {
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 className="w-full px-3.5 py-2 rounded-xl text-xs bg-slate-50 border border-slate-200"
               />
+            </div>
+
+            <div className="sm:col-span-2">
+              <label className="block text-xs font-bold text-slate-700 mb-1">Google Review Link</label>
+              <input
+                type="url"
+                placeholder="Paste your Google Business Profile review link"
+                value={formData.googleReviewUrl}
+                onChange={(e) => setFormData({ ...formData, googleReviewUrl: e.target.value })}
+                className="w-full px-3.5 py-2 rounded-xl text-xs bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+              />
+              <p className="text-[11px] text-slate-500 mt-1">Customers will see this link after their order is marked Served.</p>
             </div>
 
             <div>
