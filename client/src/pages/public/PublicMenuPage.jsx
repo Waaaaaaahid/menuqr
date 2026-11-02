@@ -66,13 +66,13 @@ export default function PublicMenuPage() {
     let isMounted = true;
 
     const fetchMenu = async () => {
-      const savedOrder = slug ? getCustomerActiveOrder(slug) : null;
+      const savedOrder = slug ? getCustomerActiveOrder(slug, tableParam) : null;
       const savedStatus = String(savedOrder?.status || '').toLowerCase();
 
       if (savedOrder?.orderId && savedStatus === 'cancelled') {
-        clearCustomerActiveOrder(slug, savedOrder.orderId);
+        clearCustomerActiveOrder(slug, savedOrder.orderId, tableParam);
       } else if (savedOrder?.orderId && !browseMenu) {
-        navigate(`/orders/${slug}`, { replace: true });
+        navigate(`/orders/${slug}?table=${encodeURIComponent(tableParam || '')}`, { replace: true });
         return;
       } else if (savedOrder?.orderId && browseMenu) {
         setActiveOrder(savedOrder);
