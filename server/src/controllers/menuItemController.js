@@ -1,5 +1,6 @@
 import MenuItem from '../models/MenuItem.js';
 import Category from '../models/Category.js';
+import { ensureSampleMenuForRestaurant } from './sampleMenuController.js';
 
 // @desc    Get all menu items for owner's restaurant
 // @route   GET /api/menu-items
@@ -7,6 +8,9 @@ import Category from '../models/Category.js';
 export const getMenuItems = async (req, res, next) => {
   try {
     const { category, search, isVeg, isAvailable, isBestseller } = req.query;
+
+    // Ensure the owner's first visit has a menu to manage.
+    await ensureSampleMenuForRestaurant(req.restaurant);
 
     const query = { restaurant: req.restaurant._id };
 
