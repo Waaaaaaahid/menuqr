@@ -46,6 +46,7 @@ export default function MenuItemsPage() {
     name: '',
     description: '',
     price: '',
+    sizeOptions: [],
     category: '',
     image: '',
     isVeg: true,
@@ -107,6 +108,7 @@ export default function MenuItemsPage() {
       name: '',
       description: '',
       price: '',
+      sizeOptions: [],
       category: categories.length > 0 ? categories[0]._id : '',
       image: '',
       isVeg: true,
@@ -125,6 +127,7 @@ export default function MenuItemsPage() {
       name: item.name,
       description: item.description || '',
       price: item.price,
+      sizeOptions: item.sizeOptions || [],
       category: item.category?._id || item.category,
       image: item.image || '',
       isVeg: item.isVeg,
@@ -509,6 +512,30 @@ export default function MenuItemsPage() {
                 className="w-full px-3.5 py-2 rounded-xl text-xs bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
               />
             </div>
+          </div>
+
+          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-3">
+            <label className="flex items-center gap-2 text-xs font-bold text-slate-800">
+              <input type="checkbox" checked={formData.sizeOptions.length > 0}
+                onChange={(e) => setFormData({ ...formData, sizeOptions: e.target.checked
+                  ? [{ name: 'Regular', price: Number(formData.price) || 0 }, { name: 'Medium', price: 0 }, { name: 'Large', price: 0 }]
+                  : [] })} className="accent-brand-500" />
+              Enable size selection (Regular / Medium / Large)
+            </label>
+            {formData.sizeOptions.length > 0 && (
+              <div className="grid grid-cols-3 gap-2">
+                {formData.sizeOptions.map((option, index) => (
+                  <div key={option.name}>
+                    <label className="block text-[11px] font-semibold text-slate-600 mb-1">{option.name} price</label>
+                    <input type="number" min="0" step="0.01" required
+                      value={option.price}
+                      onChange={(e) => setFormData({ ...formData, sizeOptions: formData.sizeOptions.map((s, i) => i === index ? { ...s, price: e.target.value } : s) })}
+                      className="w-full px-2.5 py-2 rounded-lg text-xs bg-white border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500/20" />
+                  </div>
+                ))}
+              </div>
+            )}
+            <p className="text-[10px] text-slate-500">Set a separate price for each size. Customers must choose one before adding to cart.</p>
           </div>
 
           <div>
