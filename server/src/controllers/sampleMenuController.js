@@ -26,12 +26,20 @@ const NON_VEG_WORDS = /chicken|mutton|fish|prawn|egg|pepperoni|seekh kebab/i;
 // @route POST /api/categories/import-sample-menu
 // Authenticated and scoped to the restaurant resolved by requireRestaurant.
 // Inserts missing records only; never deletes or overwrites existing categories/items.
-export const importSampleMenu = async (req, res, next) => {
-  try {
-    const restaurantId = req.restaurant._id;
-    // The owner approved INR sample pricing for this India-based demo menu.
-    req.restaurant.currency = { symbol: '₹', code: 'INR', position: 'before' };
-    await req.restaurant.save();
+// Populate a restaurant only when it has no menu items. Safe to call from
+// both the owner dashboard API and the public QR menu API.
+export const ensureSampleMenuForRestaurant = async (restaurant) => {
+    const restaurantId = restaurant._id;
+    // Never replace a restaurant's real menu with demo dishes.
+    const existingItemCount = await MenuItem.countDocuments({ restaurant: restaurantId });
+    if (existingItemCount > 0) {
+      const categoryCount = await Category.countDocuments({ restaurant: restaurantId });
+      return { categoriesCreated: 0, itemsCreated: 0, totalCategories: categoryCount, totalItems: existingItemCount };
+    }
+
+    // Sample catalogue is priced in INR for this India-based demo.
+    restaurant.currency = { symbol: '₹', code: 'INR', position: 'before' };
+    await restaurant.save();
     let categoriesCreated = 0;
     let itemsCreated = 0;
 
@@ -100,13 +108,21 @@ export const importSampleMenu = async (req, res, next) => {
       MenuItem.countDocuments({ restaurant: restaurantId }),
     ]);
 
-    return res.status(200).json({
-      success: true,
-      message: 'Sample menu import completed. Review all sample prices and dishes before publishing.',
+    return {
       categoriesCreated,
       itemsCreated,
       totalCategories: categoryCount,
       totalItems: itemCount,
+    };
+};
+
+export const importSampleMenu = async (req, res, next) => {
+  try {
+    const result = await ensureSampleMenuForRestaurant(req.restaurant);
+    return res.status(200).json({
+      success: true,
+      message: 'Sample menu is ready. Review sample dishes and prices before taking live orders.',
+      ...result,
     });
   } catch (error) {
     next(error);
