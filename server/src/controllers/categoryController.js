@@ -1,11 +1,15 @@
 import Category from '../models/Category.js';
 import MenuItem from '../models/MenuItem.js';
+import { ensureSampleMenuForRestaurant } from './sampleMenuController.js';
 
 // @desc    Get all categories for the owner's restaurant
 // @route   GET /api/categories
 // @access  Private (Owner)
 export const getCategories = async (req, res, next) => {
   try {
+    // Seed the first menu before returning categories to the dashboard.
+    await ensureSampleMenuForRestaurant(req.restaurant);
+
     const categories = await Category.find({ restaurant: req.restaurant._id }).sort({
       displayOrder: 1,
       createdAt: 1,
