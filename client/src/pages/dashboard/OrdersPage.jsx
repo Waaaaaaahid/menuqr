@@ -307,7 +307,7 @@ export default function OrdersPage() {
                           </span>
                           <DietaryBadge isVeg={item.isVeg} className="mt-0.5" />
                           <div>
-                            <p className="font-bold text-slate-800 leading-tight">{item.name}</p>
+                            <p className="font-bold text-slate-800 leading-tight">{item.name}{item.selectedSize ? ' · ' + item.selectedSize : ''}</p>
                             {item.specialInstructions && (
                               <p className="text-[11px] text-brand-600 italic mt-0.5">
                                 "{item.specialInstructions}"
