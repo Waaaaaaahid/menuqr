@@ -312,7 +312,6 @@ export const getPublicMenu = async (req, res, next) => {
         serviceChargePercentage: restaurant.serviceChargePercentage,
         announcement: restaurant.announcement,
         googleReviewUrl: restaurant.googleReviewUrl,
-        googleReviewUrl: restaurant.googleReviewUrl,
       },
       table: tableInfo
         ? {
