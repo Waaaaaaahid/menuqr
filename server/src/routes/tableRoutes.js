@@ -6,7 +6,7 @@ import {
   deleteTable,
   bulkCreateTables,
 } from '../controllers/tableController.js';
-import { getPendingTableSessions, verifyTableSession, releaseTableSession } from '../controllers/tableSessionController.js';
+import { getPendingTableSessions, verifyTableSession, rejectTableSession, releaseTableSession } from '../controllers/tableSessionController.js';
 import { protect } from '../middleware/auth.js';
 import { requireRestaurant } from '../middleware/restaurantAuth.js';
 
@@ -18,6 +18,7 @@ router.route('/').get(getTables).post(createTable);
 router.post('/bulk', bulkCreateTables);
 router.get('/verifications', getPendingTableSessions);
 router.post('/:id/verify', verifyTableSession);
+router.post('/:id/reject-verification', rejectTableSession);
 router.post('/:id/release-session', releaseTableSession);
 router.route('/:id').put(updateTable).delete(deleteTable);
 
