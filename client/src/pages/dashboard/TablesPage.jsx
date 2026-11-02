@@ -94,6 +94,19 @@ export default function TablesPage() {
     }
   };
 
+  const handleReleaseSession = async (tableId, tableNumber) => {
+    if (!window.confirm(`Release ${tableNumber} and allow a new customer session?`)) return;
+    try {
+      const res = await api.post(`/tables/${tableId}/release-session`);
+      if (res.data.success) {
+        addToast(`${tableNumber} is now available for a new session.`, 'success');
+        fetchTables();
+      }
+    } catch (err) {
+      addToast(err.response?.data?.message || 'Could not release table session.', 'error');
+    }
+  };
+
   const handleDeleteTable = async (tableId, tableNumber) => {
     if (!window.confirm(`Delete table "${tableNumber}"?`)) return;
 
@@ -218,6 +231,14 @@ export default function TablesPage() {
 
                 {/* Actions */}
                 <div className="space-y-2 pt-2 border-t border-slate-100">
+                  {table.session?.status === 'active' && (
+                    <button
+                      onClick={() => handleReleaseSession(table._id, table.tableNumber)}
+                      className="w-full px-3 py-2 rounded-lg text-[11px] font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200"
+                    >
+                      Release Verified Table Session
+                    </button>
+                  )}
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       onClick={() => setSelectedPrintTable(table)}
