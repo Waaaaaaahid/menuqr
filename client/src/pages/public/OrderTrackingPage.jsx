@@ -99,7 +99,7 @@ export default function OrderTrackingPage() {
     return () => {
       socket.off('customer_order_status', handleStatusUpdate);
     };
-  }, [socket, orderId]);
+  }, [socket, orderId, restaurant?.slug]);
 
   if (loading) {
     return (
