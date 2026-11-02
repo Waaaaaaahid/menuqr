@@ -161,14 +161,14 @@ export default function OrderTrackingPage() {
         <div className="flex items-center justify-between">
           {restaurant?.slug && (
             <Link
-              to={`/menu/${restaurant.slug}?table=${encodeURIComponent(order.table?.tableNumber || '')}&key=${encodeURIComponent(order.table?.qrToken || '')}`}
+              to={`/menu/${restaurant.slug}?table=${encodeURIComponent(order.table?.tableNumber || '')}&key=${encodeURIComponent(order.table?.qrToken || '')}&browse=1`}
               className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 bg-white px-3 py-2 rounded-xl border border-slate-200 shadow-xs transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>Back to Menu</span>
             </Link>
           )}
-          <span className="text-xs font-bold text-slate-400">Live Status Tracker</span>
+          <span className="text-xs font-bold text-slate-400">{order.status === 'completed' ? 'Order Served' : 'Live Status Tracker'}</span>
         </div>
 
         {/* Live Status Hero Card */}
@@ -353,7 +353,7 @@ export default function OrderTrackingPage() {
             <div className="pt-2">
               <Link
                 to={`/menu/${restaurant.slug}?table=${encodeURIComponent(order.table?.tableNumber || '')}&key=${encodeURIComponent(order.table?.qrToken || '')}`}
-                onClick={() => clearCustomerActiveOrder(restaurant.slug, order._id)}
+                onClick={() => { if (order.status === 'completed') clearCustomerActiveOrder(restaurant.slug, order._id); }}
                 className="w-full py-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all"
               >
                 <span>{order.status === 'completed' ? 'Order Again' : 'Add More Dishes to Table'}</span>
