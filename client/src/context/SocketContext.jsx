@@ -4,15 +4,19 @@ import { useAuth } from './AuthContext';
 
 const SocketContext = createContext();
 
+const getSocketUrl = () => {
+  const apiUrl = import.meta.env.VITE_API_URL;
+  if (apiUrl) return apiUrl.replace(/\/api\/?$/, '');
+  return window.location.hostname === 'localhost' ? 'http://localhost:5000' : window.location.origin;
+};
+
 export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
   const { restaurant, user } = useAuth();
 
   useEffect(() => {
-    // Socket connects to server on same host or port 5000 in dev
-    const socketUrl = window.location.hostname === 'localhost' ? 'http://localhost:5000' : window.location.origin;
-    const socketInstance = io(socketUrl, {
+    const socketInstance = io(getSocketUrl(), {
       auth: { token: localStorage.getItem('menuqr_token') || '' },
       transports: ['websocket', 'polling'],
       reconnectionAttempts: 5,
