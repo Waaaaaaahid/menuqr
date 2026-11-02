@@ -83,7 +83,7 @@ const seedSampleMenuForRestaurant = async (restaurant) => {
             restaurant: restaurantId,
             category: category._id,
             name,
-            description: 'Sample item — update the description, image and price before publishing.',
+            description: 'Freshly prepared and served with care.',
             price: group.base + (itemIndex * 10),
             isVeg: !NON_VEG_WORDS.test(name),
             isPopular: false,
