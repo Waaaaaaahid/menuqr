@@ -361,7 +361,7 @@ export default function OrderTrackingPage() {
           {restaurant?.slug && (
             <div className="pt-2">
               <Link
-                to={`/menu/${restaurant.slug}?table=${encodeURIComponent(order.table?.tableNumber || '')}&key=${encodeURIComponent(order.table?.qrToken || '')}`}
+                to={`/menu/${restaurant.slug}?table=${encodeURIComponent(order.table?.tableNumber || '')}&key=${encodeURIComponent(order.table?.qrToken || '')}${order.status === 'completed' ? '' : '&browse=1'}`}
                 onClick={() => { if (order.status === 'completed') clearCustomerActiveOrder(restaurant.slug, order._id); }}
                 className="w-full py-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all"
               >
