@@ -8,9 +8,8 @@ const normalizeTable = (value) => String(value || '').trim().toLowerCase();
 const readAllStoredOrders = (restaurantSlug) => {
   if (!restaurantSlug || typeof window === 'undefined') return [];
   try {
-    const keys = [oldMultiOrderKey(restaurantSlug), legacyStorageKey(restaurantSlug)];
     const combined = [];
-    keys.forEach((key) => {
+    [oldMultiOrderKey(restaurantSlug), legacyStorageKey(restaurantSlug)].forEach((key) => {
       const raw = window.localStorage.getItem(key);
       if (!raw) return;
       const parsed = JSON.parse(raw);
@@ -29,17 +28,43 @@ const readAllStoredOrders = (restaurantSlug) => {
   }
 };
 
+// One-time migration: split the old restaurant-wide order list into table-specific lists.
+const migrateLegacyOrders = (restaurantSlug) => {
+  if (!restaurantSlug || typeof window === 'undefined') return;
+  const legacyOrders = readAllStoredOrders(restaurantSlug);
+  if (!legacyOrders.length) return;
+  const byTable = new Map();
+  legacyOrders.forEach((order) => {
+    const table = order.tableNumber || '';
+    const key = storageKey(restaurantSlug, table);
+    if (!byTable.has(key)) {
+      try {
+        const existing = JSON.parse(window.localStorage.getItem(key) || '[]');
+        byTable.set(key, Array.isArray(existing) ? existing : []);
+      } catch {
+        byTable.set(key, []);
+      }
+    }
+    const list = byTable.get(key);
+    const index = list.findIndex((item) => item.orderId === order.orderId);
+    if (index >= 0) list[index] = { ...list[index], ...order };
+    else list.push(order);
+  });
+  byTable.forEach((orders, key) => window.localStorage.setItem(key, JSON.stringify(orders)));
+  window.localStorage.removeItem(oldMultiOrderKey(restaurantSlug));
+  window.localStorage.removeItem(legacyStorageKey(restaurantSlug));
+};
+
 const readStoredOrders = (restaurantSlug, tableNumber) => {
   if (!restaurantSlug || typeof window === 'undefined') return [];
   try {
-    const tableScopedRaw = window.localStorage.getItem(storageKey(restaurantSlug, tableNumber));
-    const scopedOrders = tableScopedRaw ? JSON.parse(tableScopedRaw) : [];
-    const oldOrders = readAllStoredOrders(restaurantSlug).filter(
-      (order) => normalizeTable(order.tableNumber) === normalizeTable(tableNumber)
-    );
-    const combined = [...(Array.isArray(scopedOrders) ? scopedOrders : []), ...oldOrders];
-    const unique = [...new Map(combined.filter((order) => order?.orderId).map((order) => [order.orderId, order])).values()];
-    return unique.sort((a, b) => new Date(a.createdAt || a.savedAt || 0) - new Date(b.createdAt || b.savedAt || 0));
+    migrateLegacyOrders(restaurantSlug);
+    const raw = window.localStorage.getItem(storageKey(restaurantSlug, tableNumber));
+    const parsed = raw ? JSON.parse(raw) : [];
+    const orders = Array.isArray(parsed) ? parsed : [];
+    return orders
+      .filter((order) => normalizeTable(order.tableNumber) === normalizeTable(tableNumber))
+      .sort((a, b) => new Date(a.createdAt || a.savedAt || 0) - new Date(b.createdAt || b.savedAt || 0));
   } catch {
     return [];
   }
