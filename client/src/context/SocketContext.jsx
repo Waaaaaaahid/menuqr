@@ -7,12 +7,13 @@ const SocketContext = createContext();
 export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
-  const { restaurant } = useAuth();
+  const { restaurant, user } = useAuth();
 
   useEffect(() => {
     // Socket connects to server on same host or port 5000 in dev
     const socketUrl = window.location.hostname === 'localhost' ? 'http://localhost:5000' : window.location.origin;
     const socketInstance = io(socketUrl, {
+      auth: { token: localStorage.getItem('menuqr_token') || '' },
       transports: ['websocket', 'polling'],
       reconnectionAttempts: 5,
     });
@@ -35,12 +36,17 @@ export const SocketProvider = ({ children }) => {
     };
   }, []);
 
-  // When active restaurant changes, join restaurant room
+  // Refresh socket credentials after owner login/logout, then join only the owner's room.
   useEffect(() => {
-    if (socket && isConnected && restaurant && restaurant._id) {
-      socket.emit('join_restaurant', restaurant._id);
+    if (!socket) return;
+    const token = localStorage.getItem('menuqr_token') || '';
+    if ((socket.auth?.token || '') !== token) {
+      socket.auth = { ...(socket.auth || {}), token };
+      socket.disconnect();
+      socket.connect();
     }
-  }, [socket, isConnected, restaurant]);
+    if (restaurant?._id) socket.emit('join_restaurant', restaurant._id);
+  }, [socket, restaurant, user]);
 
   const joinOrderRoom = (orderId) => {
     if (socket && orderId) {

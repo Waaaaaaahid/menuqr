@@ -14,11 +14,13 @@ export default function PublicMenuPage() {
   const { slug } = useParams();
   const [searchParams] = useSearchParams();
   const tableParam = searchParams.get('table');
+  const tableKey = searchParams.get('key');
 
   const {
     setRestaurantSlug,
     tableNumber,
     setTableNumber,
+    setTableToken,
     items: cartItems,
     addToCart,
     updateQuantity,
@@ -49,10 +51,9 @@ export default function PublicMenuPage() {
     if (slug) {
       setRestaurantSlug(slug);
     }
-    if (tableParam) {
-      setTableNumber(tableParam);
-    }
-  }, [slug, tableParam, setRestaurantSlug, setTableNumber]);
+    if (tableParam) setTableNumber(tableParam);
+    if (tableKey) setTableToken(tableKey);
+  }, [slug, tableParam, tableKey, setRestaurantSlug, setTableNumber, setTableToken]);
 
   // Fetch Public Menu Data
   useEffect(() => {
@@ -60,7 +61,7 @@ export default function PublicMenuPage() {
       try {
         setLoading(true);
         setError(null);
-        const res = await api.get(`/public/menu/${slug}${tableParam ? `?table=${tableParam}` : ''}`);
+        const res = await api.get(`/public/menu/${slug}${tableParam ? `?table=${encodeURIComponent(tableParam)}&key=${encodeURIComponent(tableKey || '')}` : ''}`);
 
         if (res.data.success) {
           setRestaurant(res.data.restaurant);
@@ -159,10 +160,7 @@ export default function PublicMenuPage() {
       <RestaurantHeader
         restaurant={restaurant}
         tableNumber={tableNumber}
-        onSelectTable={() => {
-          setTempTableInput(tableNumber || '');
-          setTableModalOpen(true);
-        }}
+        onSelectTable={() => {}}
       />
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-4 space-y-4">

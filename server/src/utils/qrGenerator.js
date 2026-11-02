@@ -1,7 +1,7 @@
 import QRCode from 'qrcode';
 
-export const generateTableQRCode = async (baseUrl, restaurantSlug, tableNumber) => {
-  const targetUrl = `${baseUrl}/menu/${restaurantSlug}?table=${encodeURIComponent(tableNumber)}`;
+export const generateTableQRCode = async (baseUrl, restaurantSlug, tableNumber, qrToken) => {
+  const targetUrl = `${baseUrl}/menu/${restaurantSlug}?table=${encodeURIComponent(tableNumber)}${qrToken ? `&key=${encodeURIComponent(qrToken)}` : ''}`;
 
   // Generate PNG Data URL with high resolution & custom color scheme
   const qrCodeDataUrl = await QRCode.toDataURL(targetUrl, {

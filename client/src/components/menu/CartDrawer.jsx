@@ -29,7 +29,7 @@ export default function CartDrawer({ restaurant, isOpen, onClose, onOpen }) {
     removeFromCart,
     clearCart,
     tableNumber,
-    setTableNumber,
+    tableToken,
     customerInfo,
     setCustomerInfo,
     specialNotes,
@@ -53,8 +53,8 @@ export default function CartDrawer({ restaurant, isOpen, onClose, onOpen }) {
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
 
-    const activeTable = tableNumber || tableInput;
-    if (!activeTable) {
+    const activeTable = tableNumber;
+    if (!activeTable || !tableToken) {
       addToast('Please enter your Table Number so the kitchen knows where to serve!', 'error');
       return;
     }
@@ -64,6 +64,7 @@ export default function CartDrawer({ restaurant, isOpen, onClose, onOpen }) {
       const payload = {
         restaurantSlug: restaurant.slug,
         tableNumber: activeTable,
+        tableKey: tableToken,
         customerName: customerInfo.name || 'Guest',
         customerPhone: customerInfo.phone || '',
         specialNotes: specialNotes || '',
@@ -177,12 +178,10 @@ export default function CartDrawer({ restaurant, isOpen, onClose, onOpen }) {
                   <input
                     type="text"
                     required
-                    placeholder="e.g. T-01 or Table 5"
+                    placeholder="Scan the QR code on your table"
                     value={tableNumber || tableInput}
-                    onChange={(e) => {
-                      setTableInput(e.target.value);
-                      setTableNumber(e.target.value);
-                    }}
+                    readOnly
+                    
                     className="w-full px-3 py-2 rounded-xl text-xs bg-white border border-amber-200 focus:outline-none focus:ring-2 focus:ring-brand-500/20 font-bold text-slate-900"
                   />
                 </div>

@@ -8,6 +8,7 @@ const tableSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
+    qrToken: { type: String, default: '', index: true },
     tableNumber: {
       type: String,
       required: [true, 'Table number or identifier is required'],

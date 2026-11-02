@@ -31,6 +31,12 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('all'); // all, pending, accepted, preparing, ready, completed
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [clockNow, setClockNow] = useState(Date.now());
+
+  useEffect(() => {
+    const interval = setInterval(() => setClockNow(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   const fetchOrders = async () => {
     try {
@@ -91,9 +97,9 @@ export default function OrdersPage() {
     };
   }, [socket, soundEnabled]);
 
-  const handleUpdateStatus = async (orderId, newStatus) => {
+  const handleUpdateStatus = async (orderId, newStatus, prepTimeMinutes) => {
     try {
-      const res = await api.put(`/orders/${orderId}/status`, { status: newStatus });
+      const res = await api.put(`/orders/${orderId}/status`, { status: newStatus, ...(prepTimeMinutes ? { prepTimeMinutes } : {}) });
       if (res.data.success) {
         setOrders((prev) =>
           prev.map((o) => (o._id === orderId ? res.data.order : o))
@@ -103,6 +109,13 @@ export default function OrdersPage() {
     } catch (err) {
       addToast('Failed to update order status', 'error');
     }
+  };
+
+  const handleTimerUpdate = async (orderId, payload) => {
+    try {
+      const res = await api.put(`/orders/${orderId}/timer`, payload);
+      if (res.data.success) setOrders((prev) => prev.map((o) => o._id === orderId ? res.data.order : o));
+    } catch (err) { addToast(err.response?.data?.message || 'Could not update preparation timer', 'error'); }
   };
 
   const filteredOrders = orders.filter((o) => {
@@ -206,6 +219,8 @@ export default function OrdersPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredOrders.map((order) => {
             const statusInfo = getOrderStatusInfo(order.status);
+            const remaining = order.prepPausedAt ? (order.prepRemainingSeconds || 0) : order.prepEndsAt ? Math.max(0, Math.ceil((new Date(order.prepEndsAt).getTime() - clockNow) / 1000)) : (order.prepRemainingSeconds || 0);
+            const timerLabel = `${Math.floor(remaining / 60)}:${String(remaining % 60).padStart(2, '0')}`;
             return (
               <div
                 key={order._id}
@@ -249,6 +264,28 @@ export default function OrdersPage() {
                       <span>{formatRelativeTime(order.createdAt)}</span>
                     </div>
                   </div>
+
+                  {(order.status === 'accepted' || order.status === 'preparing') && (
+                    <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-3 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-bold uppercase tracking-wide text-indigo-700">Preparation countdown</span>
+                        <span className="text-xl font-black tabular-nums text-indigo-950">{timerLabel}</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <input id={`prep-${order._id}`} type="number" min="1" max="240" defaultValue={order.prepTimeMinutes || 15} className="w-24 rounded-lg border border-indigo-200 bg-white px-2 py-1.5 text-xs font-bold" aria-label="Preparation minutes" />
+                        <button onClick={() => { const value = Number(document.getElementById(`prep-${order._id}`)?.value); if (value >= 1 && value <= 240) handleTimerUpdate(order._id, { minutes: value }); else addToast('Enter 1–240 minutes', 'error'); }} className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-bold text-white">Adjust</button>
+                        <button onClick={() => handleTimerUpdate(order._id, { action: order.prepPausedAt ? 'resume' : 'pause' })} className="rounded-lg border border-indigo-200 bg-white px-3 py-1.5 text-xs font-bold text-indigo-800">{order.prepPausedAt ? 'Resume' : 'Pause'}</button>
+                      </div>
+                      {order.prepPausedAt && <p className="text-[10px] font-semibold text-amber-700">Timer paused</p>}
+                    </div>
+                  )}
+                  {order.status === 'pending' && (
+                    <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 space-y-1">
+                      <p className="text-[11px] font-bold text-amber-900">Estimated prep time: {order.prepTimeMinutes || 15} min</p>
+                      <p className="text-[10px] text-amber-700">Adjust before accepting; countdown starts only after acceptance.</p>
+                      <input id={`accept-prep-${order._id}`} type="number" min="1" max="240" defaultValue={order.prepTimeMinutes || 15} className="w-24 rounded-lg border border-amber-200 bg-white px-2 py-1.5 text-xs font-bold" aria-label="Initial preparation minutes" />
+                    </div>
+                  )}
 
                   {/* Special Kitchen Notes Banner */}
                   {order.specialNotes && (
@@ -329,7 +366,7 @@ export default function OrdersPage() {
                         Reject
                       </button>
                       <button
-                        onClick={() => handleUpdateStatus(order._id, 'accepted')}
+                        onClick={() => { const minutes = Number(document.getElementById(`accept-prep-${order._id}`)?.value); handleUpdateStatus(order._id, 'accepted', minutes >= 1 && minutes <= 240 ? minutes : undefined); }}
                         className="flex-1 px-4 py-2 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-sm transition-all"
                       >
                         Accept Order

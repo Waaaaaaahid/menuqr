@@ -1,4 +1,5 @@
 import slugify from 'slugify';
+import { randomBytes } from 'crypto';
 import Restaurant from '../models/Restaurant.js';
 import User from '../models/User.js';
 import Category from '../models/Category.js';
@@ -102,11 +103,13 @@ export const createRestaurant = async (req, res, next) => {
 
     // Create Table 1 with QR Code
     const clientBaseUrl = process.env.CLIENT_URL || 'http://localhost:5173';
-    const qrInfo = await generateTableQRCode(clientBaseUrl, restaurant.slug, 'T-01');
+    const qrToken = randomBytes(24).toString('hex');
+    const qrInfo = await generateTableQRCode(clientBaseUrl, restaurant.slug, 'T-01', qrToken);
 
     await Table.create({
       restaurant: restaurant._id,
       tableNumber: 'T-01',
+      qrToken,
       capacity: 4,
       status: 'available',
       qrCodeDataUrl: qrInfo.qrCodeDataUrl,
@@ -246,7 +249,7 @@ export const uploadMedia = async (req, res, next) => {
 export const getPublicMenu = async (req, res, next) => {
   try {
     const { slug } = req.params;
-    const { table: tableParam } = req.query;
+    const { table: tableParam, key: tableKey } = req.query;
 
     const restaurant = await Restaurant.findOne({ slug });
     if (!restaurant) {
@@ -256,13 +259,16 @@ export const getPublicMenu = async (req, res, next) => {
       });
     }
 
-    // Verify table if specified
+    // A public menu session must originate from a table's QR code.
+    if (!tableParam || !tableKey) return res.status(403).json({ success: false, message: 'Please scan the QR code placed on your table to open this menu.' });
     let tableInfo = null;
-    if (tableParam) {
+    if (tableParam && tableKey) {
       tableInfo = await Table.findOne({
         restaurant: restaurant._id,
         tableNumber: tableParam,
+        qrToken: tableKey,
       });
+      if (!tableInfo) return res.status(403).json({ success: false, message: 'Invalid table QR code. Please scan the QR displayed on your table.' });
     }
 
     // Fetch active categories sorted by displayOrder
@@ -305,9 +311,8 @@ export const getPublicMenu = async (req, res, next) => {
             tableNumber: tableInfo.tableNumber,
             capacity: tableInfo.capacity,
             status: tableInfo.status,
+            qrToken: tableInfo.qrToken,
           }
-        : tableParam
-        ? { tableNumber: tableParam }
         : null,
       categories,
       menuItems,

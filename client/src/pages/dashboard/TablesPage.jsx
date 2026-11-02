@@ -172,7 +172,7 @@ export default function TablesPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           {tables.map((table) => {
-            const tableMenuUrl = `/menu/${restaurant.slug}?table=${encodeURIComponent(table.tableNumber)}`;
+            const tableMenuUrl = `/menu/${restaurant.slug}?table=${encodeURIComponent(table.tableNumber)}&key=${encodeURIComponent(table.qrToken || '')}`;
             return (
               <div
                 key={table._id}

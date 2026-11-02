@@ -24,6 +24,12 @@ export default function OrderTrackingPage() {
   const [restaurant, setRestaurant] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [clockNow, setClockNow] = useState(Date.now());
+
+  useEffect(() => {
+    const interval = setInterval(() => setClockNow(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -115,6 +121,8 @@ export default function OrderTrackingPage() {
 
   const currentStep = getStepIndex(order.status);
   const isCancelled = order.status === 'cancelled';
+  const timerSeconds = order.prepPausedAt ? (order.prepRemainingSeconds || 0) : order.prepEndsAt ? Math.max(0, Math.ceil((new Date(order.prepEndsAt).getTime() - clockNow) / 1000)) : (order.prepRemainingSeconds || 0);
+  const timerText = `${Math.floor(timerSeconds / 60)}:${String(timerSeconds % 60).padStart(2, '0')}`;
 
   return (
     <div className="min-h-screen bg-slate-50 py-8 px-4 sm:px-6">
@@ -123,7 +131,7 @@ export default function OrderTrackingPage() {
         <div className="flex items-center justify-between">
           {restaurant?.slug && (
             <Link
-              to={`/menu/${restaurant.slug}?table=${encodeURIComponent(order.table?.tableNumber || '')}`}
+              to={`/menu/${restaurant.slug}?table=${encodeURIComponent(order.table?.tableNumber || '')}&key=${encodeURIComponent(order.table?.qrToken || '')}`}
               className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 bg-white px-3 py-2 rounded-xl border border-slate-200 shadow-xs transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
@@ -220,6 +228,14 @@ export default function OrderTrackingPage() {
             </div>
           )}
 
+          {order.prepStartedAt && !isCancelled && !['ready', 'completed'].includes(order.status) && (
+            <div className="rounded-2xl border border-indigo-200 bg-indigo-50 p-5 text-center space-y-1">
+              <p className="text-[10px] font-black uppercase tracking-widest text-indigo-700">Estimated preparation time</p>
+              <p className="text-4xl font-black tabular-nums text-indigo-950">{order.prepPausedAt ? 'Paused' : timerText}</p>
+              <p className="text-xs text-indigo-700">{order.prepPausedAt ? 'The kitchen timer is temporarily paused.' : 'Live countdown — the restaurant can adjust this estimate.'}</p>
+            </div>
+          )}
+
           {/* Itemized Order Summary */}
           <div className="border-t border-slate-100 pt-5 space-y-3">
             <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
@@ -285,7 +301,7 @@ export default function OrderTrackingPage() {
           {restaurant?.slug && (
             <div className="pt-2">
               <Link
-                to={`/menu/${restaurant.slug}?table=${encodeURIComponent(order.table?.tableNumber || '')}`}
+                to={`/menu/${restaurant.slug}?table=${encodeURIComponent(order.table?.tableNumber || '')}&key=${encodeURIComponent(order.table?.qrToken || '')}`}
                 className="w-full py-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all"
               >
                 <span>Add More Dishes to Table</span>

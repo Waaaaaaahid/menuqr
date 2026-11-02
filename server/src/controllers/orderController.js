@@ -23,6 +23,7 @@ export const placeOrder = async (req, res, next) => {
     const {
       restaurantSlug,
       tableNumber,
+      tableKey,
       customerName,
       customerPhone,
       items,
@@ -52,17 +53,19 @@ export const placeOrder = async (req, res, next) => {
       });
     }
 
-    // Lookup Table if tableNumber provided
-    let tableDoc = null;
-    if (tableNumber) {
-      tableDoc = await Table.findOne({
-        restaurant: restaurant._id,
-        tableNumber: tableNumber.trim(),
-      });
+    // Orders are accepted only from a valid table-specific QR link.
+    if (!tableNumber || !tableKey) {
+      return res.status(400).json({ success: false, message: 'Please scan the QR code placed on your table to order.' });
+    }
+    const tableDoc = await Table.findOne({ restaurant: restaurant._id, tableNumber: tableNumber.trim(), qrToken: tableKey });
+    if (!tableDoc) {
+      return res.status(403).json({ success: false, message: 'This table QR code is invalid. Please scan the QR displayed on your table.' });
     }
 
     // Fetch and verify all items server-side to guarantee accurate pricing
     let subtotal = 0;
+    let maxItemPrepMinutes = 0;
+    let quantityLoadMinutes = 0;
     const verifiedOrderItems = [];
 
     for (const item of items) {
@@ -88,6 +91,10 @@ export const placeOrder = async (req, res, next) => {
       const quantity = Math.max(1, Number(item.quantity) || 1);
       const itemTotal = dbItem.price * quantity;
       subtotal += itemTotal;
+      const prepRange = String(dbItem.preparationTime || '15').match(/\d+/g) || ['15'];
+      const itemPrepMinutes = Math.max(1, Number(prepRange[prepRange.length - 1]) || 15);
+      maxItemPrepMinutes = Math.max(maxItemPrepMinutes, itemPrepMinutes);
+      quantityLoadMinutes += Math.max(0, quantity - 1) * 1.5;
 
       verifiedOrderItems.push({
         menuItem: dbItem._id,
@@ -106,6 +113,7 @@ export const placeOrder = async (req, res, next) => {
     );
     const totalAmount = Number((subtotal + tax + serviceCharge).toFixed(2));
 
+    const estimatedPrepMinutes = Math.min(240, Math.max(1, Math.ceil(maxItemPrepMinutes + quantityLoadMinutes)));
     const orderNumber = generateOrderNumber();
 
     const order = await Order.create({
@@ -113,7 +121,8 @@ export const placeOrder = async (req, res, next) => {
       orderNumber,
       table: {
         id: tableDoc ? tableDoc._id : null,
-        tableNumber: tableNumber ? tableNumber.trim() : 'Takeaway / Counter',
+        tableNumber: tableNumber.trim(),
+        qrToken: tableDoc.qrToken,
       },
       customer: {
         name: customerName ? customerName.trim() : 'Guest',
@@ -125,6 +134,8 @@ export const placeOrder = async (req, res, next) => {
       serviceCharge,
       totalAmount,
       status: 'pending',
+      prepTimeMinutes: estimatedPrepMinutes,
+      prepRemainingSeconds: estimatedPrepMinutes * 60,
       paymentMethod: paymentMethod || 'cash',
       paymentStatus: 'unpaid',
       specialNotes: specialNotes || '',
@@ -224,7 +235,26 @@ export const updateOrderStatus = async (req, res, next) => {
       });
     }
 
+    const previousStatus = order.status;
     order.status = status;
+
+    // The kitchen countdown starts only when the admin accepts the order.
+    if (status === 'accepted' && previousStatus === 'pending') {
+      const requestedMinutes = Number(req.body.prepTimeMinutes);
+      if (Number.isFinite(requestedMinutes) && requestedMinutes >= 1 && requestedMinutes <= 240) {
+        order.prepTimeMinutes = Math.round(requestedMinutes);
+      }
+      order.prepStartedAt = new Date();
+      order.prepPausedAt = null;
+      order.prepRemainingSeconds = order.prepTimeMinutes * 60;
+      order.prepEndsAt = new Date(Date.now() + order.prepRemainingSeconds * 1000);
+    }
+
+    if (status === 'ready' || status === 'completed' || status === 'cancelled') {
+      order.prepEndsAt = null;
+      order.prepPausedAt = null;
+      order.prepRemainingSeconds = 0;
+    }
 
     // If completed or cancelled, mark paid or release table
     if (status === 'completed') {
@@ -262,6 +292,56 @@ export const updateOrderStatus = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
+
+// @desc    Adjust, pause or resume an order preparation timer
+// @route   PUT /api/orders/:id/timer
+// @access  Private (Owner)
+export const updateOrderTimer = async (req, res, next) => {
+  try {
+    const order = await Order.findOne({ _id: req.params.id, restaurant: req.restaurant._id });
+    if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+    if (!['accepted', 'preparing'].includes(order.status)) {
+      return res.status(400).json({ success: false, message: 'Timer can only be changed for accepted or preparing orders.' });
+    }
+    const now = new Date();
+    const { minutes, action } = req.body;
+    if (action === 'pause') {
+      if (order.prepEndsAt && !order.prepPausedAt) {
+        order.prepRemainingSeconds = Math.max(0, Math.ceil((order.prepEndsAt.getTime() - now.getTime()) / 1000));
+        order.prepPausedAt = now;
+        order.prepEndsAt = null;
+      }
+    } else if (action === 'resume') {
+      if (order.prepPausedAt) {
+        order.prepEndsAt = new Date(now.getTime() + Math.max(0, order.prepRemainingSeconds) * 1000);
+        order.prepPausedAt = null;
+        order.prepStartedAt = order.prepStartedAt || now;
+      }
+    } else if (minutes !== undefined) {
+      const value = Number(minutes);
+      if (!Number.isFinite(value) || value < 1 || value > 240) {
+        return res.status(400).json({ success: false, message: 'Preparation time must be between 1 and 240 minutes.' });
+      }
+      order.prepTimeMinutes = Math.round(value);
+      order.prepRemainingSeconds = order.prepTimeMinutes * 60;
+      if (order.prepPausedAt) {
+        order.prepEndsAt = null;
+      } else {
+        order.prepStartedAt = order.prepStartedAt || now;
+        order.prepEndsAt = new Date(now.getTime() + order.prepRemainingSeconds * 1000);
+      }
+    } else {
+      return res.status(400).json({ success: false, message: 'Provide minutes or a pause/resume action.' });
+    }
+    await order.save();
+    const io = getIO();
+    if (io) {
+      io.to(`restaurant_${req.restaurant._id}`).emit('order_status_updated', order);
+      io.to(`order_${order._id}`).emit('customer_order_status', order);
+    }
+    res.status(200).json({ success: true, order, message: 'Preparation timer updated.' });
+  } catch (error) { next(error); }
 };
 
 // @desc    Get order details by ID (for live customer order tracking)

@@ -1,4 +1,5 @@
 import Table from '../models/Table.js';
+import { randomBytes } from 'crypto';
 import Restaurant from '../models/Restaurant.js';
 import { generateTableQRCode } from '../utils/qrGenerator.js';
 
@@ -10,6 +11,18 @@ export const getTables = async (req, res, next) => {
     const tables = await Table.find({ restaurant: req.restaurant._id })
       .populate('activeOrder', 'orderNumber status totalAmount createdAt')
       .sort({ tableNumber: 1 });
+
+    // Upgrade older tables created before QR tokens were introduced.
+    for (const table of tables) {
+      if (!table.qrToken) {
+        table.qrToken = randomBytes(24).toString('hex');
+        const clientBaseUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+        const qrInfo = await generateTableQRCode(clientBaseUrl, req.restaurant.slug, table.tableNumber, table.qrToken);
+        table.qrCodeDataUrl = qrInfo.qrCodeDataUrl;
+        table.qrCodeSvg = qrInfo.qrCodeSvg;
+        await table.save();
+      }
+    }
 
     res.status(200).json({
       success: true,
@@ -49,15 +62,18 @@ export const createTable = async (req, res, next) => {
     }
 
     const clientBaseUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+    const qrToken = randomBytes(24).toString('hex');
     const qrInfo = await generateTableQRCode(
       clientBaseUrl,
       req.restaurant.slug,
-      tableNumber.trim()
+      tableNumber.trim(),
+      qrToken
     );
 
     const table = await Table.create({
       restaurant: req.restaurant._id,
       tableNumber: tableNumber.trim(),
+      qrToken,
       capacity: capacity ? Number(capacity) : 4,
       status: 'available',
       qrCodeDataUrl: qrInfo.qrCodeDataUrl,
@@ -114,7 +130,8 @@ export const updateTable = async (req, res, next) => {
       const qrInfo = await generateTableQRCode(
         clientBaseUrl,
         req.restaurant.slug,
-        table.tableNumber
+        table.tableNumber,
+        table.qrToken
       );
       table.qrCodeDataUrl = qrInfo.qrCodeDataUrl;
       table.qrCodeSvg = qrInfo.qrCodeSvg;
@@ -185,15 +202,18 @@ export const bulkCreateTables = async (req, res, next) => {
       });
 
       if (!exists) {
+        const qrToken = randomBytes(24).toString('hex');
         const qrInfo = await generateTableQRCode(
           clientBaseUrl,
           req.restaurant.slug,
-          tableNumber
+          tableNumber,
+          qrToken
         );
 
         const table = await Table.create({
           restaurant: req.restaurant._id,
           tableNumber,
+          qrToken,
           capacity: Number(capacity),
           status: 'available',
           qrCodeDataUrl: qrInfo.qrCodeDataUrl,
