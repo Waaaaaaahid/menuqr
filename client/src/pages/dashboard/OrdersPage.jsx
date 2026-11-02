@@ -176,7 +176,7 @@ export default function OrdersPage() {
           { key: 'accepted', label: 'Accepted', count: getStatusCount('accepted'), color: 'bg-blue-500' },
           { key: 'preparing', label: 'Preparing', count: getStatusCount('preparing'), color: 'bg-indigo-500' },
           { key: 'ready', label: 'Ready', count: getStatusCount('ready'), color: 'bg-emerald-500' },
-          { key: 'completed', label: 'Completed', count: getStatusCount('completed'), color: 'bg-slate-500' },
+          { key: 'completed', label: 'Served', count: getStatusCount('completed'), color: 'bg-slate-500' },
           { key: 'cancelled', label: 'Cancelled', count: getStatusCount('cancelled'), color: 'bg-rose-500' },
         ].map((tab) => (
           <button
@@ -400,7 +400,7 @@ export default function OrdersPage() {
                       className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 shadow-sm transition-all"
                     >
                       <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                      Complete & Clear Table
+                      Mark Served
                     </button>
                   )}
 
