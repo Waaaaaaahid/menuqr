@@ -91,7 +91,7 @@ export const placeOrder = async (req, res, next) => {
       const quantity = Math.max(1, Number(item.quantity) || 1);
       const itemTotal = dbItem.price * quantity;
       subtotal += itemTotal;
-      const prepRange = String(dbItem.preparationTime || '15').match(/\\d+/g) || ['15'];
+      const prepRange = String(dbItem.preparationTime || '15').match(/\d+/g) || ['15'];
       const itemPrepMinutes = Math.max(1, Number(prepRange[prepRange.length - 1]) || 15);
       maxItemPrepMinutes = Math.max(maxItemPrepMinutes, itemPrepMinutes);
       quantityLoadMinutes += Math.max(0, quantity - 1) * 1.5;
