@@ -180,6 +180,7 @@ export const updateMyRestaurant = async (req, res, next) => {
       announcement,
       logo,
       coverImage,
+      googleReviewUrl,
     } = req.body;
 
     if (name && name !== restaurant.name) {
@@ -310,6 +311,7 @@ export const getPublicMenu = async (req, res, next) => {
         taxPercentage: restaurant.taxPercentage,
         serviceChargePercentage: restaurant.serviceChargePercentage,
         announcement: restaurant.announcement,
+        googleReviewUrl: restaurant.googleReviewUrl,
         googleReviewUrl: restaurant.googleReviewUrl,
       },
       table: tableInfo
