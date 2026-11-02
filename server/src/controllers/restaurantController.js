@@ -40,6 +40,7 @@ export const createRestaurant = async (req, res, next) => {
       serviceChargePercentage,
       logo,
       coverImage,
+      googleReviewUrl,
     } = req.body;
 
     if (!name) {
@@ -207,6 +208,7 @@ export const updateMyRestaurant = async (req, res, next) => {
     if (announcement !== undefined) restaurant.announcement = announcement;
     if (logo !== undefined) restaurant.logo = logo;
     if (coverImage !== undefined) restaurant.coverImage = coverImage;
+    if (googleReviewUrl !== undefined) restaurant.googleReviewUrl = googleReviewUrl;
 
     await restaurant.save();
 
@@ -308,6 +310,7 @@ export const getPublicMenu = async (req, res, next) => {
         taxPercentage: restaurant.taxPercentage,
         serviceChargePercentage: restaurant.serviceChargePercentage,
         announcement: restaurant.announcement,
+        googleReviewUrl: restaurant.googleReviewUrl,
       },
       table: tableInfo
         ? {
