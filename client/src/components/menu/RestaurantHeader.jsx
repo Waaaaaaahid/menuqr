@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   MapPin,
   Phone,
@@ -99,13 +100,13 @@ export default function RestaurantHeader({ restaurant, tableNumber, onSelectTabl
             {/* Status, saved order shortcut & restaurant info */}
             <div className="flex items-center gap-2 self-stretch sm:self-auto justify-between sm:justify-start pt-1">
               {activeOrder?.orderId && (
-                <a
-                  href={`/order/${activeOrder.orderId}`}
+                <Link
+                  to={`/order/${activeOrder.orderId}`}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 shadow-sm transition-colors whitespace-nowrap"
                 >
                   <PackageCheck className="w-3.5 h-3.5" />
                   <span>Track My Order</span>
-                </a>
+                </Link>
               )}
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                 <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
