@@ -511,7 +511,7 @@ export const seedDatabase = async () => {
     "Margherita Pizza",
     "Farmhouse Pizza",
     "Pepperoni Pizza",
-    "四 Cheese Pizza",
+    "Four Cheese Pizza",
     "Paneer Tikka Pizza",
     "BBQ Chicken Pizza",
     "Mexican Green Wave Pizza",
@@ -639,9 +639,9 @@ export const seedDatabase = async () => {
       "Sandwiches & Subs": "photo-1553909489-cd47e0ef937f",
       "Wraps & Rolls": "photo-1626700051175-6818013e1d4f",
       "Fries & Sides": "photo-1573080496219-bb080dd4f877",
-      "Momos & Dumplings": "photo-156324示",
-      "Pasta": "photo- pasta",
-      "Chinese & Asian": "photo- wok",
+      "Momos & Dumplings": "photo-1563245372-f21724e3856d",
+      "Pasta": "photo-1473093295043-cdd812d0e601",
+      "Chinese & Asian": "photo-1585032226651-759b368d7246",
       "Street Food & Chaat": "photo-1601050690597-df0568f70950",
       "Shakes & Smoothies": "photo-1572490122747-3968b75cc699",
       "Coffee & Matcha": "photo-1515823064-d6e0c04616a7"
@@ -673,7 +673,7 @@ export const seedDatabase = async () => {
       });
     }
 
-    if (categoriesData.length !== 15 || menuItemsData.length !== 150) {
+    if (categoriesData.length !== 16 || menuItemsData.length !== 160) {
       throw new Error(`Expected 15 categories and 150 menu items, got ${categoriesData.length} and ${menuItemsData.length}`);
     }
 
