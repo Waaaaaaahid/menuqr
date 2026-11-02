@@ -43,6 +43,9 @@ export const requestTableSession = async (req, res, next) => {
     });
     if (!table) return res.status(403).json({ success: false, message: 'Invalid table QR. Please scan the QR on your table.' });
 
+    if (table.status === 'occupied' && table.session?.status !== 'active') {
+      return res.status(409).json({ success: false, message: 'This table has an unfinished or existing order. Please ask the staff before starting a new session.' });
+    }
     if (table.session?.status === 'active') {
       return res.status(409).json({ success: false, message: 'This table already has an active customer session. Please ask the staff.' });
     }
