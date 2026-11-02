@@ -77,7 +77,7 @@ export const getOrderStatusInfo = (status) => {
       };
     case 'completed':
       return {
-        label: 'Completed',
+        label: 'Served',
         bg: 'bg-slate-100 text-slate-700 border-slate-200',
         badgeBg: 'bg-slate-600',
         dot: 'bg-slate-500',
