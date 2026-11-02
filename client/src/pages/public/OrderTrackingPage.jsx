@@ -24,6 +24,12 @@ export default function OrderTrackingPage() {
   const [restaurant, setRestaurant] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [clockNow, setClockNow] = useState(Date.now());
+
+  useEffect(() => {
+    const interval = setInterval(() => setClockNow(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -115,6 +121,8 @@ export default function OrderTrackingPage() {
 
   const currentStep = getStepIndex(order.status);
   const isCancelled = order.status === 'cancelled';
+  const timerSeconds = order.prepPausedAt ? (order.prepRemainingSeconds || 0) : order.prepEndsAt ? Math.max(0, Math.ceil((new Date(order.prepEndsAt).getTime() - clockNow) / 1000)) : (order.prepRemainingSeconds || 0);
+  const timerText = `${Math.floor(timerSeconds / 60)}:${String(timerSeconds % 60).padStart(2, '0')}`;
 
   return (
     <div className="min-h-screen bg-slate-50 py-8 px-4 sm:px-6">
