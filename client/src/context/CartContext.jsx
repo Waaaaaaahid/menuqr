@@ -7,6 +7,7 @@ export const CartProvider = ({ children }) => {
   const [items, setItems] = useState([]);
   const [tableNumber, setTableNumber] = useState('');
   const [tableToken, setTableToken] = useState('');
+  const [tableSessionInfo, setTableSessionInfo] = useState({ tableNumber: '', token: '' });
   const [customerInfo, setCustomerInfo] = useState({ name: '', phone: '' });
   const [specialNotes, setSpecialNotes] = useState('');
 
@@ -105,6 +106,8 @@ export const CartProvider = ({ children }) => {
         setTableNumber,
         tableToken,
         setTableToken,
+        tableSessionInfo,
+        setTableSessionInfo,
         customerInfo,
         setCustomerInfo,
         specialNotes,
