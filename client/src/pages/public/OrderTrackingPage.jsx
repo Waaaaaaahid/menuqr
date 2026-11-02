@@ -53,7 +53,7 @@ export default function OrderTrackingPage() {
               savedAt: new Date().toISOString(),
             });
           } else {
-            clearCustomerActiveOrder(res.data.restaurant.slug, res.data.order._id);
+            clearCustomerActiveOrder(res.data.restaurant.slug, res.data.order._id, res.data.order.table?.tableNumber || '');
           }
         }
       } catch (err) {
@@ -90,7 +90,7 @@ export default function OrderTrackingPage() {
             savedAt: new Date().toISOString(),
           });
         } else if (restaurant?.slug) {
-          clearCustomerActiveOrder(restaurant.slug, updatedOrder._id);
+          clearCustomerActiveOrder(restaurant.slug, updatedOrder._id, updatedOrder.table?.tableNumber || '');
         }
       }
     };
@@ -161,7 +161,7 @@ export default function OrderTrackingPage() {
         <div className="flex items-center justify-between">
           {restaurant?.slug && (
             <Link
-              to={`/orders/${restaurant.slug}`}
+              to={`/orders/${restaurant.slug}?table=${encodeURIComponent(order.table?.tableNumber || '')}`}
               className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 bg-white px-3 py-2 rounded-xl border border-slate-200 shadow-xs transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
@@ -362,7 +362,7 @@ export default function OrderTrackingPage() {
             <div className="pt-2">
               <Link
                 to={`/menu/${restaurant.slug}?table=${encodeURIComponent(order.table?.tableNumber || '')}&key=${encodeURIComponent(order.table?.qrToken || '')}${order.status === 'completed' ? '' : '&browse=1'}`}
-                onClick={() => { if (order.status === 'completed') clearCustomerActiveOrder(restaurant.slug, order._id); }}
+                onClick={() => { if (order.status === 'completed') clearCustomerActiveOrder(restaurant.slug, order._id, order.table?.tableNumber || ''); }}
                 className="w-full py-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all"
               >
                 <span>{order.status === 'completed' ? 'Order Again' : 'Add More Dishes to Table'}</span>
