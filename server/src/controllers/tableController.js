@@ -12,6 +12,18 @@ export const getTables = async (req, res, next) => {
       .populate('activeOrder', 'orderNumber status totalAmount createdAt')
       .sort({ tableNumber: 1 });
 
+    // Upgrade older tables created before QR tokens were introduced.
+    for (const table of tables) {
+      if (!table.qrToken) table.qrToken = randomBytes(24).toString('hex');
+      if (!table.qrCodeSvg?.includes(table.qrToken)) {
+        const clientBaseUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+        const qrInfo = await generateTableQRCode(clientBaseUrl, req.restaurant.slug, table.tableNumber, table.qrToken);
+        table.qrCodeDataUrl = qrInfo.qrCodeDataUrl;
+        table.qrCodeSvg = qrInfo.qrCodeSvg;
+        await table.save();
+      }
+    }
+
     res.status(200).json({
       success: true,
       count: tables.length,
