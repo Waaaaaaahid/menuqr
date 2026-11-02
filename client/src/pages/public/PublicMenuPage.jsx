@@ -9,7 +9,7 @@ import FoodDetailModal from '../../components/menu/FoodDetailModal';
 import CartDrawer from '../../components/menu/CartDrawer';
 import Modal from '../../components/common/Modal';
 import { DietaryBadge } from '../../components/common/Badge';
-import { getCustomerActiveOrder, saveCustomerActiveOrder, clearCustomerActiveOrder, isCustomerOrderActive } from '../../utils/customerOrders';
+import { getCustomerActiveOrder, clearCustomerActiveOrder } from '../../utils/customerOrders';
 
 export default function PublicMenuPage() {
   const { slug } = useParams();
@@ -59,80 +59,56 @@ export default function PublicMenuPage() {
     if (tableKey) setTableToken(tableKey);
   }, [slug, tableParam, tableKey, setRestaurantSlug, setTableNumber, setTableToken]);
 
-  // Fetch Public Menu Data
+  // Restore an existing order before requesting the menu. The tracking page
+  // performs the authoritative refresh, so scanning again avoids a redundant
+  // menu request followed by a second order-verification request.
   useEffect(() => {
+    let isMounted = true;
+
     const fetchMenu = async () => {
+      const savedOrder = slug ? getCustomerActiveOrder(slug) : null;
+      const savedStatus = String(savedOrder?.status || '').toLowerCase();
+
+      if (savedOrder?.orderId && savedStatus === 'cancelled') {
+        clearCustomerActiveOrder(slug, savedOrder.orderId);
+      } else if (savedOrder?.orderId && !browseMenu) {
+        navigate(`/order/${savedOrder.orderId}`, { replace: true });
+        return;
+      } else if (savedOrder?.orderId && browseMenu) {
+        setActiveOrder(savedOrder);
+      } else {
+        setActiveOrder(null);
+      }
+
       try {
         setLoading(true);
         setError(null);
         const res = await api.get(`/public/menu/${slug}${tableParam ? `?table=${encodeURIComponent(tableParam)}&key=${encodeURIComponent(tableKey || '')}` : ''}`);
 
+        if (!isMounted) return;
         if (res.data.success) {
           setRestaurant(res.data.restaurant);
           setCategories(res.data.categories);
           setMenuItems(res.data.menuItems);
 
-          // Log anonymous visit for analytics
+          // Analytics must never delay menu rendering.
           api.post('/public/analytics/view', {
             restaurantId: res.data.restaurant.id,
             tableNumber: tableParam || '',
           }).catch(() => {});
         }
       } catch (err) {
+        if (!isMounted) return;
         console.error(err);
         setError(err.response?.data?.message || 'Restaurant menu not found.');
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
 
-    if (slug) {
-      fetchMenu();
-    }
-  }, [slug, tableParam]);
-
-  // Restore and verify this customer's active order on this device.
-  useEffect(() => {
-    if (!restaurant || !slug || browseMenu) return;
-    const savedOrder = getCustomerActiveOrder(slug);
-    if (!savedOrder?.orderId) {
-      setActiveOrder(null);
-      return;
-    }
-
-    if (String(savedOrder.status || '').toLowerCase() === 'cancelled') {
-      clearCustomerActiveOrder(slug, savedOrder.orderId);
-      setActiveOrder(null);
-      return;
-    }
-
-    setActiveOrder(savedOrder);
-    // A repeat QR scan on the same browser resumes the customer's latest order.
-    navigate(`/order/${savedOrder.orderId}`, { replace: true });
-    let isMounted = true;
-    api.get(`/public/orders/${savedOrder.orderId}`)
-      .then((res) => {
-        if (!isMounted || !res.data?.success) return;
-        const latestOrder = res.data.order;
-        if (!isCustomerOrderActive(latestOrder.status)) {
-          clearCustomerActiveOrder(slug, savedOrder.orderId);
-          setActiveOrder(null);
-          return;
-        }
-        const refreshed = {
-          ...savedOrder,
-          status: latestOrder.status,
-          orderNumber: latestOrder.orderNumber || savedOrder.orderNumber,
-        };
-        saveCustomerActiveOrder(slug, refreshed);
-        setActiveOrder(refreshed);
-      })
-      .catch(() => {
-        // Keep the saved link available if the network is temporarily unavailable.
-      });
-
+    if (slug) fetchMenu();
     return () => { isMounted = false; };
-  }, [restaurant, slug, navigate, browseMenu]);
+  }, [slug, tableParam, tableKey, browseMenu, navigate]);
 
   const scrollToCategory = (catId) => {
     setActiveCategory(catId);
