@@ -1,12 +1,12 @@
 import crypto from 'crypto';
 import Subscription from '../models/Subscription.js';
 
-const PLAN_CONFIG = {
+const PLAN_CONFIG = () => ({
   free: { name: 'Free', amount: 0, features: ['Digital menu', 'QR code for up to 5 tables', 'Up to 25 menu items'] },
   normal: { name: 'Normal', amount: Number(process.env.MENUQR_NORMAL_AMOUNT_PAISE || 29900), features: ['Everything in Free', 'Live order dashboard', 'Up to 10 tables'] },
   medium: { name: 'Medium', amount: Number(process.env.MENUQR_MEDIUM_AMOUNT_PAISE || 59900), features: ['Everything in Normal', 'Unlimited tables', 'Kitchen order notifications', 'Basic analytics'] },
   pro: { name: 'Pro', amount: Number(process.env.MENUQR_PRO_AMOUNT_PAISE || 99900), features: ['Everything in Medium', 'Advanced analytics', 'Priority support', 'Custom branding'] },
-};
+});
 
 const getRazorpay = () => {
   if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
@@ -37,7 +37,7 @@ const razorpayRequest = async (endpoint, method = 'GET', body) => {
 export const getPlans = (req, res) => {
   res.json({
     success: true,
-    plans: Object.entries(PLAN_CONFIG).map(([id, plan]) => ({
+    plans: Object.entries(PLAN_CONFIG()).map(([id, plan]) => ({
       id, name: plan.name, amount: plan.amount, currency: 'INR',
       price: plan.amount / 100, interval: 'monthly', features: plan.features,
     })),
@@ -47,7 +47,7 @@ export const getPlans = (req, res) => {
 export const createCheckout = async (req, res, next) => {
   try {
     const { plan: planKey } = req.body;
-    const config = PLAN_CONFIG[planKey];
+    const config = PLAN_CONFIG()[planKey];
     if (!config) return res.status(400).json({ success: false, message: 'Please select a valid subscription plan.' });
 
     if (planKey === 'free') {
