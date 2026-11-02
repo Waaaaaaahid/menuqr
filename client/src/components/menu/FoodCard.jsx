@@ -31,7 +31,7 @@ export default function FoodCard({ dish, currency, cartItem, onAddToCart, onUpda
 
           <div className="pt-1">
             <span className="text-sm font-extrabold text-slate-900">
-              {formatCurrency(dish.price, currency)}
+              {dish.sizeOptions?.length ? 'From ' + formatCurrency(Math.min(...dish.sizeOptions.map((s) => s.price)), currency) : formatCurrency(dish.price, currency)}
             </span>
           </div>
         </div>
@@ -57,7 +57,9 @@ export default function FoodCard({ dish, currency, cartItem, onAddToCart, onUpda
             className="absolute -bottom-2.5 z-10"
             onClick={(e) => e.stopPropagation()}
           >
-            {quantity > 0 ? (
+            {dish.sizeOptions?.length ? (
+              <button onClick={() => onOpenDetail(dish)} className="px-3.5 py-1.5 rounded-xl bg-white text-brand-600 font-bold text-xs border border-brand-200 shadow-md">CHOOSE SIZE</button>
+            ) : quantity > 0 ? (
               <div className="flex items-center gap-2 px-2 py-1 rounded-xl bg-brand-500 text-white shadow-md shadow-brand-500/30 text-xs font-bold">
                 <button
                   onClick={() => onUpdateQuantity(dish._id, quantity - 1)}
