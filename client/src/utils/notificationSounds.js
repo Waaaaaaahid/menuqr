@@ -18,26 +18,25 @@ export const unlockNotificationAudio = () => {
   return Promise.resolve();
 };
 
-const playBellStrike = (context, startAt, fundamental, volume) => {
-  // Several inharmonic partials create a bright, metallic bell-like ring.
-  const partials = [
-    { ratio: 1, level: 1 },
-    { ratio: 2.756, level: 0.42 },
-    { ratio: 5.404, level: 0.16 },
-  ];
+const playTelephoneRingBurst = (context, startAt) => {
+  // Two slightly detuned tones create the classic loud, old-school telephone trill.
+  const master = context.createGain();
+  master.gain.setValueAtTime(0.0001, startAt);
+  master.gain.setValueAtTime(0.22, startAt + 0.015);
+  master.gain.setValueAtTime(0.22, startAt + 0.52);
+  master.gain.setValueAtTime(0.0001, startAt + 0.54);
+  master.gain.setValueAtTime(0.22, startAt + 0.72);
+  master.gain.setValueAtTime(0.22, startAt + 1.24);
+  master.gain.setValueAtTime(0.0001, startAt + 1.26);
+  master.connect(context.destination);
 
-  partials.forEach(({ ratio, level }) => {
+  [440, 480].forEach((frequency) => {
     const oscillator = context.createOscillator();
-    const envelope = context.createGain();
-    oscillator.type = 'sine';
-    oscillator.frequency.setValueAtTime(fundamental * ratio, startAt);
-    envelope.gain.setValueAtTime(0.0001, startAt);
-    envelope.gain.exponentialRampToValueAtTime(Math.max(0.0002, volume * level), startAt + 0.012);
-    envelope.gain.exponentialRampToValueAtTime(0.0001, startAt + 1.05);
-    oscillator.connect(envelope);
-    envelope.connect(context.destination);
+    oscillator.type = 'sawtooth';
+    oscillator.frequency.setValueAtTime(frequency, startAt);
+    oscillator.connect(master);
     oscillator.start(startAt);
-    oscillator.stop(startAt + 1.08);
+    oscillator.stop(startAt + 1.28);
   });
 };
 
@@ -60,9 +59,9 @@ export const playAdminNewOrderBell = () => {
   if (!context) return;
   const play = () => {
     const now = context.currentTime + 0.025;
-    [880, 784, 880].forEach((frequency, index) => {
-      playBellStrike(context, now + index * 0.48, frequency, 0.13);
-    });
+    // Two unmistakable "TRRING... TRRING..." telephone-style bursts.
+    playTelephoneRingBurst(context, now);
+    playTelephoneRingBurst(context, now + 1.75);
   };
   if (context.state === 'running') play();
   else context.resume().then(() => { if (context.state === 'running') play(); }).catch(() => {});
