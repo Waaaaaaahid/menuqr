@@ -9,6 +9,7 @@ import FoodDetailModal from '../../components/menu/FoodDetailModal';
 import CartDrawer from '../../components/menu/CartDrawer';
 import Modal from '../../components/common/Modal';
 import { DietaryBadge } from '../../components/common/Badge';
+import { getCustomerActiveOrder, saveCustomerActiveOrder, clearCustomerActiveOrder, isCustomerOrderActive } from '../../utils/customerOrders';
 
 export default function PublicMenuPage() {
   const { slug } = useParams();
@@ -27,6 +28,7 @@ export default function PublicMenuPage() {
   } = useCart();
 
   const [restaurant, setRestaurant] = useState(null);
+  const [activeOrder, setActiveOrder] = useState(null);
   const [categories, setCategories] = useState([]);
   const [menuItems, setMenuItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -86,6 +88,41 @@ export default function PublicMenuPage() {
       fetchMenu();
     }
   }, [slug, tableParam]);
+
+  // Restore and verify this customer's active order on this device.
+  useEffect(() => {
+    if (!restaurant || !slug) return;
+    const savedOrder = getCustomerActiveOrder(slug);
+    if (!savedOrder?.orderId) {
+      setActiveOrder(null);
+      return;
+    }
+
+    setActiveOrder(savedOrder);
+    let isMounted = true;
+    api.get(`/public/orders/${savedOrder.orderId}`)
+      .then((res) => {
+        if (!isMounted || !res.data?.success) return;
+        const latestOrder = res.data.order;
+        if (!isCustomerOrderActive(latestOrder.status)) {
+          clearCustomerActiveOrder(slug, savedOrder.orderId);
+          setActiveOrder(null);
+          return;
+        }
+        const refreshed = {
+          ...savedOrder,
+          status: latestOrder.status,
+          orderNumber: latestOrder.orderNumber || savedOrder.orderNumber,
+        };
+        saveCustomerActiveOrder(slug, refreshed);
+        setActiveOrder(refreshed);
+      })
+      .catch(() => {
+        // Keep the saved link available if the network is temporarily unavailable.
+      });
+
+    return () => { isMounted = false; };
+  }, [restaurant, slug]);
 
   const scrollToCategory = (catId) => {
     setActiveCategory(catId);
@@ -161,6 +198,7 @@ export default function PublicMenuPage() {
         restaurant={restaurant}
         tableNumber={tableNumber}
         onSelectTable={() => {}}
+        activeOrder={activeOrder}
       />
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-4 space-y-4">
