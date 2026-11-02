@@ -101,7 +101,7 @@ export default function RestaurantHeader({ restaurant, tableNumber, onSelectTabl
             <div className="flex items-center gap-2 self-stretch sm:self-auto justify-between sm:justify-start pt-1">
               {activeOrder?.orderId && (
                 <Link
-                  to={`/orders/${restaurant.slug}`}
+                  to={`/orders/${restaurant.slug}?table=${encodeURIComponent(activeOrder.tableNumber || tableNumber || '')}`}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 shadow-sm transition-colors whitespace-nowrap"
                 >
                   <PackageCheck className="w-3.5 h-3.5" />
