@@ -206,12 +206,14 @@ export default function TablesPage() {
 
                     <span
                       className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
-                        table.status === 'occupied'
-                          ? 'bg-amber-50 text-amber-700 border-amber-200'
-                          : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                        table.session?.status === 'pending'
+                          ? 'bg-blue-50 text-blue-700 border-blue-200'
+                          : table.status === 'occupied'
+                            ? 'bg-amber-50 text-amber-700 border-amber-200'
+                            : 'bg-emerald-50 text-emerald-700 border-emerald-200'
                       }`}
                     >
-                      {table.status === 'occupied' ? 'Occupied' : 'Available'}
+                      {table.session?.status === 'pending' ? 'Verification Pending' : table.status === 'occupied' ? 'Occupied' : 'Available'}
                     </span>
                   </div>
 
