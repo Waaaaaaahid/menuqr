@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useSearchParams, Link } from 'react-router-dom';
+import { useParams, useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { Search, Sparkles, AlertCircle, QrCode, Store, ChevronRight } from 'lucide-react';
 import api from '../../api/axios';
 import { useCart } from '../../context/CartContext';
@@ -14,6 +14,7 @@ import { getCustomerActiveOrder, saveCustomerActiveOrder, clearCustomerActiveOrd
 export default function PublicMenuPage() {
   const { slug } = useParams();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const tableParam = searchParams.get('table');
   const tableKey = searchParams.get('key');
 
@@ -98,7 +99,15 @@ export default function PublicMenuPage() {
       return;
     }
 
+    if (String(savedOrder.status || '').toLowerCase() === 'cancelled') {
+      clearCustomerActiveOrder(slug, savedOrder.orderId);
+      setActiveOrder(null);
+      return;
+    }
+
     setActiveOrder(savedOrder);
+    // A repeat QR scan on the same browser resumes the customer's latest order.
+    navigate(`/order/${savedOrder.orderId}`, { replace: true });
     let isMounted = true;
     api.get(`/public/orders/${savedOrder.orderId}`)
       .then((res) => {
@@ -122,7 +131,7 @@ export default function PublicMenuPage() {
       });
 
     return () => { isMounted = false; };
-  }, [restaurant, slug]);
+  }, [restaurant, slug, navigate]);
 
   const scrollToCategory = (catId) => {
     setActiveCategory(catId);
