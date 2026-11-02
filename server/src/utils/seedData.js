@@ -74,34 +74,100 @@ export const seedDatabase = async () => {
     const categoriesData = [
       {
         name: "Chef's Signature Specials",
-        description: 'Exclusive hand-crafted masterpieces created by Chef Arjun',
+        description: "House favourites and chef-crafted signature plates.",
         displayOrder: 1,
         image: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=400&auto=format&fit=crop&q=80',
       },
       {
-        name: 'Dum Biryanis & Rice',
-        description: 'Fragrant basmati rice slow-cooked under dough seal with saffron and whole spices',
+        name: "Dum Biryanis & Rice",
+        description: "Fragrant rice bowls, dum biryani and flavour-packed pulao.",
         displayOrder: 2,
         image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&auto=format&fit=crop&q=80',
       },
       {
-        name: 'Tandoor & Starters',
-        description: 'Clay-oven grilled appetizers and crunchy delicacies',
+        name: "Tandoor & Starters",
+        description: "Grilled kebabs, crispy starters and shareable appetisers.",
         displayOrder: 3,
         image: 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?w=400&auto=format&fit=crop&q=80',
       },
       {
-        name: 'Rich Curries & Breads',
-        description: 'Velvety gravies simmered with fresh herbs, paired with butter garlic naan',
+        name: "Rich Curries & Breads",
+        description: "Comforting curries, paneer dishes and fresh Indian breads.",
         displayOrder: 4,
         image: 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=400&auto=format&fit=crop&q=80',
       },
       {
-        name: 'Desserts & Refreshers',
-        description: 'Traditional sweets, saffron lassi, and artisanal mocktails',
+        name: "Desserts & Refreshers",
+        description: "Classic Indian desserts and sweet treats.",
         displayOrder: 5,
         image: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=400&auto=format&fit=crop&q=80',
       },
+      {
+        name: "Burgers & Sliders",
+        description: "Juicy burgers, loaded sliders and crispy buns.",
+        displayOrder: 6,
+        image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&auto=format&fit=crop&q=80',
+      },
+      {
+        name: "Pizza",
+        description: "Stone-baked favourites, cheesy classics and loaded pizzas.",
+        displayOrder: 7,
+        image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&auto=format&fit=crop&q=80',
+      },
+      {
+        name: "Sandwiches & Subs",
+        description: "Toasted sandwiches, subs and café-style melts.",
+        displayOrder: 8,
+        image: 'https://images.unsplash.com/photo-1553909489-cd47e0ef937f?w=400&auto=format&fit=crop&q=80',
+      },
+      {
+        name: "Wraps & Rolls",
+        description: "Grilled wraps, kathi rolls and flavour-packed rolls.",
+        displayOrder: 9,
+        image: 'https://images.unsplash.com/photo-1626700051175-6818013e1d4f?w=400&auto=format&fit=crop&q=80',
+      },
+      {
+        name: "Fries & Sides",
+        description: "Crispy fries, cheesy sides and crunchy snacks.",
+        displayOrder: 10,
+        image: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400&auto=format&fit=crop&q=80',
+      },
+      {
+        name: "Momos & Dumplings",
+        description: "Steamed, fried and tossed momos with dipping sauces.",
+        displayOrder: 11,
+        image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&auto=format&fit=crop&q=80',
+      },
+      {
+        name: "Pasta",
+        description: "Creamy, cheesy and tomato-based pasta bowls.",
+        displayOrder: 12,
+        image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&auto=format&fit=crop&q=80',
+      },
+      {
+        name: "Chinese & Asian",
+        description: "Wok-tossed noodles, rice and Indo-Chinese favourites.",
+        displayOrder: 13,
+        image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&auto=format&fit=crop&q=80',
+      },
+      {
+        name: "Street Food & Chaat",
+        description: "Indian street-food classics, chaat and savoury bites.",
+        displayOrder: 14,
+        image: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=400&auto=format&fit=crop&q=80',
+      },
+      {
+        name: "Shakes & Smoothies",
+        description: "Thick shakes, fruit smoothies and chilled blends.",
+        displayOrder: 15,
+        image: 'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=400&auto=format&fit=crop&q=80',
+      },
+      {
+        name: "Coffee & Matcha",
+        description: "Espresso classics, iced coffee and creamy matcha drinks.",
+        displayOrder: 16,
+        image: 'https://images.unsplash.com/photo-1515823064-d6e0c04616a7?w=400&auto=format&fit=crop&q=80',
+      }
     ];
 
     const categoryMap = {};
@@ -113,7 +179,7 @@ export const seedDatabase = async () => {
       categoryMap[cat.name] = created._id;
     }
 
-    console.log('[Seed] Created 5 categories.');
+    console.log(`[Seed] Created ${categoriesData.length} categories.`);
 
     // 4. Create Menu Items
     const menuItemsData = [
@@ -365,6 +431,251 @@ export const seedDatabase = async () => {
         preparationTime: '5 min',
       },
     ];
+
+    // Fill every category to exactly 10 menu items (150 total).
+    // Existing signature dishes are retained; only missing items are added.
+    const categoryMenuNames = {
+  "Chef's Signature Specials": [
+    "Royal Nizami Mutton Dum Biryani",
+    "Smoked Butter Chicken (Murgh Makhani)",
+    "Truffle Malai Kofta",
+    "Chef's Special Paneer Tikka",
+    "Peri Peri Chicken Platter",
+    "Tandoori Mushroom Delight",
+    "Creamy Afghani Chicken",
+    "Lahori Chicken Tikka",
+    "Signature Veg Kebab Platter",
+    "Special Masala Chaap"
+  ],
+  "Dum Biryanis & Rice": [
+    "Hyderabadi Chicken Dum Biryani",
+    "Shahi Subz Paneer Biryani",
+    "Tiger Prawn Dum Biryani",
+    "Lucknowi Mutton Biryani",
+    "Egg Dum Biryani",
+    "Veg Dum Biryani",
+    "Chicken Tikka Biryani",
+    "Jeera Rice",
+    "Peas Pulao",
+    "Steamed Basmati Rice"
+  ],
+  "Tandoor & Starters": [
+    "Bhatti Da Murgh Tikka",
+    "Crispy Dahi Ke Kebab",
+    "Galouti Kebab Sliders",
+    "Tandoori Malai Broccoli",
+    "Paneer Tikka",
+    "Chicken Seekh Kebab",
+    "Hara Bhara Kebab",
+    "Afghani Chicken Tikka",
+    "Tandoori Soya Chaap",
+    "Crispy Corn"
+  ],
+  "Rich Curries & Breads": [
+    "Dal Makhani Bukhara",
+    "Kashmiri Rogan Josh",
+    "Paneer Tikka Masala",
+    "Artisanal Garlic Truffle Naan",
+    "Butter Naan",
+    "Tandoori Roti",
+    "Shahi Paneer",
+    "Kadhai Chicken",
+    "Chole Masala",
+    "Laccha Paratha"
+  ],
+  "Desserts & Refreshers": [
+    "Saffron Pistachio Kulfi Falooda",
+    "Rose Mango Lassi",
+    "Warm Gulab Jamun with Madagascan Vanilla Ice Cream",
+    "Classic Rasmalai",
+    "Gajar Ka Halwa",
+    "Chocolate Brownie",
+    "New York Cheesecake",
+    "Matka Kulfi",
+    "Rasmalai Tres Leches",
+    "Hot Chocolate Fudge"
+  ],
+  "Burgers & Sliders": [
+    "Classic Veg Burger",
+    "Crispy Chicken Burger",
+    "Double Cheese Burger",
+    "Paneer Tikka Burger",
+    "BBQ Chicken Burger",
+    "Mushroom Swiss Burger",
+    "Peri Peri Veg Burger",
+    "Zinger Chicken Burger",
+    "Aloo Tikki Burger",
+    "Smoky BBQ Slider"
+  ],
+  "Pizza": [
+    "Margherita Pizza",
+    "Farmhouse Pizza",
+    "Pepperoni Pizza",
+    "四 Cheese Pizza",
+    "Paneer Tikka Pizza",
+    "BBQ Chicken Pizza",
+    "Mexican Green Wave Pizza",
+    "Peri Peri Chicken Pizza",
+    "Corn & Cheese Pizza",
+    "Loaded Supreme Pizza"
+  ],
+  "Sandwiches & Subs": [
+    "Classic Veg Sandwich",
+    "Grilled Cheese Sandwich",
+    "Club Sandwich",
+    "Paneer Tikka Sandwich",
+    "Chicken Mayo Sandwich",
+    "Corn & Spinach Melt",
+    "BBQ Chicken Sub",
+    "Tandoori Paneer Sub",
+    "Peri Peri Chicken Sandwich",
+    "Mushroom Cheese Toastie"
+  ],
+  "Wraps & Rolls": [
+    "Paneer Kathi Roll",
+    "Chicken Tikka Roll",
+    "Veggie Hummus Wrap",
+    "Egg Frankie Roll",
+    "Malai Chicken Roll",
+    "Falafel Wrap",
+    "Soya Chaap Roll",
+    "Peri Peri Chicken Wrap",
+    "Aloo Tikki Wrap",
+    "Cheese Corn Roll"
+  ],
+  "Fries & Sides": [
+    "Classic Salted Fries",
+    "Peri Peri Fries",
+    "Cheesy Loaded Fries",
+    "Masala Fries",
+    "Garlic Bread",
+    "Cheese Garlic Bread",
+    "Onion Rings",
+    "Potato Wedges",
+    "Jalapeno Cheese Poppers",
+    "Chicken Nuggets"
+  ],
+  "Momos & Dumplings": [
+    "Veg Steamed Momos",
+    "Veg Fried Momos",
+    "Paneer Momos",
+    "Chicken Steamed Momos",
+    "Chicken Fried Momos",
+    "Kurkure Momos",
+    "Tandoori Veg Momos",
+    "Tandoori Chicken Momos",
+    "Chilli Garlic Momos",
+    "Afghani Momos"
+  ],
+  "Pasta": [
+    "Penne Alfredo Pasta",
+    "Penne Arrabbiata",
+    "White Sauce Pasta",
+    "Red Sauce Pasta",
+    "Pink Sauce Pasta",
+    "Mac and Cheese",
+    "Pesto Cream Pasta",
+    "Chicken Alfredo Pasta",
+    "Spicy Peri Peri Pasta",
+    "Baked Cheese Pasta"
+  ],
+  "Chinese & Asian": [
+    "Veg Hakka Noodles",
+    "Chicken Hakka Noodles",
+    "Veg Manchurian",
+    "Chilli Paneer",
+    "Chilli Chicken",
+    "Schezwan Fried Rice",
+    "Veg Spring Rolls",
+    "Honey Chilli Potato",
+    "Thai Basil Chicken",
+    "Crispy Corn Salt & Pepper"
+  ],
+  "Street Food & Chaat": [
+    "Papdi Chaat",
+    "Aloo Tikki Chaat",
+    "Dahi Bhalla",
+    "Pani Puri",
+    "Sev Puri",
+    "Pav Bhaji",
+    "Samosa Chaat",
+    "Delhi Aloo Chaat",
+    "Chole Bhature",
+    "Dahi Puri"
+  ],
+  "Shakes & Smoothies": [
+    "Classic Chocolate Shake",
+    "Oreo Milkshake",
+    "Strawberry Shake",
+    "Mango Smoothie",
+    "Banana Peanut Butter Shake",
+    "KitKat Shake",
+    "Blueberry Smoothie",
+    "Vanilla Bean Shake",
+    "Cold Coffee Frappe",
+    "Caramel Crunch Shake"
+  ],
+  "Coffee & Matcha": [
+    "Classic Cappuccino",
+    "Café Latte",
+    "Americano",
+    "Espresso",
+    "Mocha",
+    "Iced Spanish Latte",
+    "Iced Americano",
+    "Classic Matcha Latte",
+    "Iced Strawberry Matcha",
+    "Vanilla Matcha Frappe"
+  ]
+};
+    const categoryImages = {
+      "Chef's Signature Specials": "photo-1544025162-d76694265947",
+      "Dum Biryanis & Rice": "photo-1563379091339-03b21ab4a4f8",
+      "Tandoor & Starters": "photo-1599488615731-7e5c2823ff28",
+      "Rich Curries & Breads": "photo-1585937421612-70a008356fbe",
+      "Desserts & Refreshers": "photo-1551024709-8f23befc6f87",
+      "Burgers & Sliders": "photo-1568901346375-23c9450c58cd",
+      "Pizza": "photo-1579751626657-72bc17010498",
+      "Sandwiches & Subs": "photo-1553909489-cd47e0ef937f",
+      "Wraps & Rolls": "photo-1626700051175-6818013e1d4f",
+      "Fries & Sides": "photo-1573080496219-bb080dd4f877",
+      "Momos & Dumplings": "photo-156324示",
+      "Pasta": "photo- pasta",
+      "Chinese & Asian": "photo- wok",
+      "Street Food & Chaat": "photo-1601050690597-df0568f70950",
+      "Shakes & Smoothies": "photo-1572490122747-3968b75cc699",
+      "Coffee & Matcha": "photo-1515823064-d6e0c04616a7"
+    };
+    const meatPattern = /chicken|mutton|lamb|prawn|shrimp|fish|pepperoni|beef|nugget|egg|non.?veg/i;
+    for (const [categoryName, itemNames] of Object.entries(categoryMenuNames)) {
+      const existingNames = new Set(
+        menuItemsData
+          .filter((item) => item.category?.toString() === categoryMap[categoryName]?.toString())
+          .map((item) => item.name)
+      );
+      itemNames.forEach((name, index) => {
+        if (existingNames.has(name)) return;
+        const isVeg = !meatPattern.test(name);
+        menuItemsData.push({
+          name,
+          description: `${name} prepared fresh with quality ingredients, house seasoning and a delicious signature finish.`,
+          price: Number((5.5 + ((index * 2.35 + categoriesData.findIndex((cat) => cat.name === categoryName) * 1.7) % 15)).toFixed(2)),
+          category: categoryMap[categoryName],
+          image: `https://images.unsplash.com/${categoryImages[categoryName]}?w=600&auto=format&fit=crop&q=80`,
+          isVeg,
+          isBestseller: index === 0,
+          isPopular: index < 3,
+          isSpicy: /peri peri|chilli|spicy|schezwan|masala/i.test(name),
+          spiceLevel: /peri peri|chilli|spicy|schezwan/i.test(name) ? 2 : 0,
+          isNewItem: index === 9,
+          preparationTime: categoryName.includes('Drinks') || categoryName.includes('Coffee') || categoryName.includes('Shakes') ? '5 min' : '10-20 min',
+        });
+      });
+    }
+
+    if (categoriesData.length !== 15 || menuItemsData.length !== 150) {
+      throw new Error(`Expected 15 categories and 150 menu items, got ${categoriesData.length} and ${menuItemsData.length}`);
+    }
 
     const createdMenuItems = [];
     for (const item of menuItemsData) {
