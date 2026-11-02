@@ -28,7 +28,7 @@ const NON_VEG_WORDS = /chicken|mutton|fish|prawn|egg|pepperoni|seekh kebab/i;
 // Inserts missing records only; never deletes or overwrites existing categories/items.
 // Populate a restaurant only when it has no menu items. Safe to call from
 // both the owner dashboard API and the public QR menu API.
-export const ensureSampleMenuForRestaurant = async (restaurant) => {
+const seedSampleMenuForRestaurant = async (restaurant) => {
     const restaurantId = restaurant._id;
     // Never replace a restaurant's real menu with demo dishes.
     const existingItemCount = await MenuItem.countDocuments({ restaurant: restaurantId });
@@ -114,6 +114,21 @@ export const ensureSampleMenuForRestaurant = async (restaurant) => {
       totalCategories: categoryCount,
       totalItems: itemCount,
     };
+};
+
+
+const sampleMenuJobs = new Map();
+
+export const ensureSampleMenuForRestaurant = async (restaurant) => {
+  const restaurantKey = String(restaurant._id);
+  const inFlight = sampleMenuJobs.get(restaurantKey);
+  if (inFlight) return inFlight;
+
+  const job = seedSampleMenuForRestaurant(restaurant).finally(() => {
+    sampleMenuJobs.delete(restaurantKey);
+  });
+  sampleMenuJobs.set(restaurantKey, job);
+  return job;
 };
 
 export const importSampleMenu = async (req, res, next) => {
