@@ -98,7 +98,7 @@ export default function MyOrdersPage() {
     };
     loadOrders();
     return () => { mounted = false; };
-  }, [slug]);
+  }, [slug, tableParam]);
 
   useEffect(() => {
     if (!socket || !orders.length) return;
