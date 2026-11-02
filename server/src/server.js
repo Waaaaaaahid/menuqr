@@ -27,10 +27,12 @@ const server = http.createServer(app);
 // Initialize Socket.IO
 initSocket(server);
 
-// Middleware
+// JWT bearer authentication is used by the client, so cross-origin cookies
+// are not needed. Restrict browser access to the configured frontend in production.
+const clientOrigin = process.env.CLIENT_URL;
 app.use(cors({
-  origin: '*',
-  credentials: true,
+  origin: clientOrigin || '*',
+  credentials: Boolean(clientOrigin),
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -70,7 +72,6 @@ const clientDistPath = path.resolve('../client/dist');
 if (fs.existsSync(clientDistPath)) {
   app.use(express.static(clientDistPath));
   app.get('*', (req, res, next) => {
-    // If request is not an API call, serve index.html
     if (!req.path.startsWith('/api')) {
       return res.sendFile(path.join(clientDistPath, 'index.html'));
     }
@@ -84,11 +85,16 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-// Connect to MongoDB and start HTTP Server
-connectDB().then(() => {
-  server.listen(PORT, () => {
-    console.log(`[Server] MenuQR backend server running on http://localhost:${PORT}`);
+// Do not start accepting requests until the configured database is connected.
+connectDB()
+  .then(() => {
+    server.listen(PORT, () => {
+      console.log(`[Server] MenuQR backend server running on port ${PORT}`);
+    });
+  })
+  .catch((error) => {
+    console.error('[Server] Startup aborted because MongoDB is unavailable:', error.message);
+    process.exit(1);
   });
-});
 
 export default app;
