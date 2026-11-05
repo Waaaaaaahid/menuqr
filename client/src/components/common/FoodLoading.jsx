@@ -56,7 +56,7 @@ function FoodIllustration({ type }) {
   );
 }
 
-export default function FoodLoading({ message = 'Freshly made, just for you.' }) {
+export default function FoodLoading() {
   const [stage, setStage] = useState(0);
 
   useEffect(() => {
@@ -66,13 +66,13 @@ export default function FoodLoading({ message = 'Freshly made, just for you.' })
 
   const current = FOOD_STAGES[stage];
   return (
-    <div className="food-loading-screen" role="status" aria-live="polite" aria-label={message}>
+    <div className="food-loading-screen" role="status" aria-live="polite" aria-label="Freshly made, just for you.">
       <div className="food-loader-content">
         <div className="food-loader-art" key={current}>
           <FoodIllustration type={current} />
           <FoodIllustration type={current} />
         </div>
-        <p className="food-loader-copy">{message}</p>
+        <p className="food-loader-copy">Freshly made, just for you.</p>
       </div>
     </div>
   );
