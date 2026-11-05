@@ -6,6 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useSocket } from '../../context/SocketContext';
 import { useToast } from '../../components/common/Toast';
 import api from '../../api/axios';
+import FoodLoading from '../../components/common/FoodLoading';
 
 export default function DashboardLayout() {
   const { user, restaurant, loading } = useAuth();
@@ -93,12 +94,7 @@ export default function DashboardLayout() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-4 border-brand-500 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-xs font-semibold text-slate-500">Loading your restaurant workspace...</p>
-        </div>
-      </div>
+      <FoodLoading message="Loading your restaurant workspace" />
     );
   }
 
