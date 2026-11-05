@@ -18,6 +18,7 @@ import { formatCurrency, formatRelativeTime, getOrderStatusInfo } from '../../ut
 import { DietaryBadge } from '../../components/common/Badge';
 import { saveCustomerActiveOrder, clearCustomerActiveOrder, isCustomerOrderActive } from '../../utils/customerOrders';
 import { playCustomerReadyChime, unlockNotificationAudio } from '../../utils/notificationSounds';
+import FoodLoading from '../../components/common/FoodLoading';
 
 export default function OrderTrackingPage() {
   const { orderId } = useParams();
@@ -122,12 +123,7 @@ export default function OrderTrackingPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-4 border-brand-500 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-xs font-semibold text-slate-500">Tracking your table order...</p>
-        </div>
-      </div>
+      <FoodLoading message="Tracking your table order" />
     );
   }
 
