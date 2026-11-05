@@ -1,18 +1,11 @@
 import React from 'react';
 
-export default function FoodLoading() {
+export default function FoodLoading({ message = 'Loading...' }) {
   return (
-    <div className="food-loading-screen" role="status" aria-live="polite" aria-label="Preparing your menu">
-      <div className="premium-loader">
-        <div className="premium-loader-mark" aria-hidden="true">
-          <span className="premium-plate premium-plate-outer" />
-          <span className="premium-plate premium-plate-inner" />
-          <span className="premium-loader-orbit" />
-          <span className="premium-loader-spark">✦</span>
-        </div>
-        <div className="premium-loader-wordmark">menu<span>qr</span></div>
-        <p className="premium-loader-caption">A better way to dine</p>
-        <div className="premium-loader-status">Preparing your experience<span className="premium-loader-dots"><i /><i /><i /></span></div>
+    <div className="min-h-screen w-full flex items-center justify-center bg-slate-50 p-4" role="status" aria-live="polite">
+      <div className="flex flex-col items-center gap-3">
+        <div className="h-11 w-11 rounded-full border-4 border-orange-500 border-t-transparent animate-spin" />
+        <p className="text-xs font-semibold text-slate-500">{message}</p>
       </div>
     </div>
   );
